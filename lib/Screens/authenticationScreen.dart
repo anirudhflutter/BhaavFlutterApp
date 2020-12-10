@@ -1,7 +1,7 @@
 import 'package:bhaav/constant/constants.dart';
 import 'package:bhaav/constant/langString.dart';
-import 'package:bhaav/screen/loginScreen.dart';
-import 'package:bhaav/screen/signupScreen.dart';
+import 'package:bhaav/Screens/loginScreen.dart';
+import 'package:bhaav/Screens/signupScreen.dart';
 import 'package:flutter/material.dart';
 
 class AuthenticationScreen extends StatefulWidget {
@@ -152,12 +152,12 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
     );
   }
 
-  void goToNextScreen(screen) {
+  void goToNextScreen(Screens) {
     //if from SplashScreen go to LogIn Screen
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => screen,
+        builder: (context) => Screens,
       ),
     );
   }

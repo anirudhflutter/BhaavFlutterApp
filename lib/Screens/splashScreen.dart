@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bhaav/screen/langSelection.dart';
+import 'package:bhaav/Screens/langSelection.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {

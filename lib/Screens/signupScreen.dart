@@ -1,6 +1,6 @@
 import 'package:bhaav/constant/constants.dart';
 import 'package:bhaav/constant/langString.dart';
-import 'package:bhaav/screen/homeScreen.dart';
+import 'package:bhaav/Screens/homeScreen.dart';
 import 'package:flutter/material.dart';
 
 class SignupScreen extends StatefulWidget {
