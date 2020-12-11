@@ -247,7 +247,6 @@ class _SignupScreenState extends State<SignupScreen> {
                       child: Text(
                         BaseLang.getSubmit(),
                         style: TextStyle(
-                          fontFamily: 'Quick',
                           color: COLOR.primaryColor,
                           fontWeight: FontWeight.bold,
                         ),

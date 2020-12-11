@@ -111,41 +111,53 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Container(
-                        width: 110,
-                        height: 110,
-                        margin: EdgeInsets.only(right: 5, left: 5),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            border:
-                                Border.all(color: Colors.grey[300], width: 1),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(16.0)),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
-                                  blurRadius: 2.0,
-                                  spreadRadius: 2.0,
-                                  offset: Offset(4.0, 5.0))
-                            ]),
+                      GestureDetector(
+                        child: Container(
+                          width: 110,
+                          height: 110,
+                          margin: EdgeInsets.only(right: 5, left: 5),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              border:
+                                  Border.all(color: Colors.grey[300], width: 1),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(16.0)),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    blurRadius: 2.0,
+                                    spreadRadius: 2.0,
+                                    offset: Offset(4.0, 5.0))
+                              ]),
+                        ),
+                        onTap: () {
+                          Navigator.of(context)
+                              .pushNamed('/calculateIncomeScreen');
+                        },
                       ),
-                      Container(
-                        width: 110,
-                        height: 110,
-                        margin: EdgeInsets.only(right: 5, left: 5),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            border:
-                                Border.all(color: Colors.grey[300], width: 1),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(16.0)),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
-                                  blurRadius: 2.0,
-                                  spreadRadius: 2.0,
-                                  offset: Offset(4.0, 5.0))
-                            ]),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context)
+                              .pushNamed('/SalesHistoryScreen');
+                        },
+                        child: Container(
+                          width: 110,
+                          height: 110,
+                          margin: EdgeInsets.only(right: 5, left: 5),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              border:
+                                  Border.all(color: Colors.grey[300], width: 1),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(16.0)),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    blurRadius: 2.0,
+                                    spreadRadius: 2.0,
+                                    offset: Offset(4.0, 5.0))
+                              ]),
+                        ),
                       ),
                     ],
                   ),

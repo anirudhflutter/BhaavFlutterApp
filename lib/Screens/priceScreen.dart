@@ -1,4 +1,4 @@
-import 'package:bhaav/Components/PriceComponent.dart';
+import 'package:bhaav/Components/SalesHistoryComponent.dart';
 import 'package:bhaav/constant/constants.dart';
 import 'package:bhaav/constant/langString.dart';
 import 'package:flutter/cupertino.dart';
