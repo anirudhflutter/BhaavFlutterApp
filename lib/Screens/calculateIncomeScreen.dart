@@ -140,7 +140,7 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                               left: 17.0, right: 17, top: 15),
                           child: TextField(
                             decoration: InputDecoration(
-                              hintText: "Enter Quantity Name",
+                              hintText: "Enter Quantity",
                               isDense: true,
                               labelText: "Quantity",
                               labelStyle: TextStyle(
@@ -404,7 +404,7 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                               left: 17.0, right: 17, top: 15),
                           child: TextField(
                             decoration: InputDecoration(
-                              hintText: "Enter Quantity Name",
+                              hintText: "Enter Quantity",
                               isDense: true,
                               labelText: "Quantity",
                               labelStyle: TextStyle(
@@ -692,37 +692,43 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                         SizedBox(
                           height: MediaQuery.of(context).padding.top + 40,
                         ),
-                        Container(
-                          height: 40,
-                          width: 250,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: COLOR.primaryColor),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: Row(
-                            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(left: 5.0),
-                                child: Image.asset(
-                                  'assets/images/shipping.png',
-                                  height: 23,
-                                  color: COLOR.primaryColor,
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context)
+                                .pushNamed('/SalesHistoryScreen');
+                          },
+                          child: Container(
+                            height: 40,
+                            width: 250,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: COLOR.primaryColor),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Row(
+                              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 5.0),
+                                  child: Image.asset(
+                                    'assets/images/shipping.png',
+                                    height: 23,
+                                    color: COLOR.primaryColor,
+                                  ),
                                 ),
-                              ),
-                              Expanded(
-                                child: Center(
-                                  child: Text(
-                                    "Sell Later",
-                                    style: TextStyle(
-                                      fontSize: 19,
-                                      color: COLOR.primaryColor,
-                                      fontWeight: FontWeight.bold,
+                                Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      "Sell Later",
+                                      style: TextStyle(
+                                        fontSize: 19,
+                                        color: COLOR.primaryColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ],

@@ -1,7 +1,6 @@
 import 'package:bhaav/Components/ProductComponent.dart';
+import 'package:bhaav/Constant/langString.dart';
 import 'package:bhaav/constant/constants.dart';
-import 'package:bhaav/constant/langString.dart';
-import 'package:bhaav/Screens/priceScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -79,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 85.0, left: 10),
                     child: Text(
-                      'Farmer Name',
+                      BaseLang.getTypeToSearch(),
                       style: TextStyle(
                         fontSize: 20.0,
                         fontFamily: 'Quick',
@@ -172,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
           centerTitle: true,
           elevation: 0,
           title: Text(
-            "Home",
+            "",
             // BaseLang.getLogin(),
             style: TextStyle(
               fontFamily: 'Quick',

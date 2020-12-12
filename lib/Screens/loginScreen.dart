@@ -19,9 +19,14 @@ class _LoginScreenState extends State<LoginScreen> {
         leading: Padding(
           padding:
               const EdgeInsets.only(top: 8.0, right: 0, left: 10, bottom: 8),
-          child: Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+            ),
           ),
         ),
         title: Text(

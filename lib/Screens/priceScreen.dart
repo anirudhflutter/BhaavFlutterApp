@@ -1,3 +1,4 @@
+import 'package:bhaav/Components/PriceComponent.dart';
 import 'package:bhaav/Components/SalesHistoryComponent.dart';
 import 'package:bhaav/constant/constants.dart';
 import 'package:bhaav/constant/langString.dart';
@@ -83,33 +84,33 @@ class _PriceScreenState extends State<PriceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          brightness: Brightness.dark,
-          backgroundColor: COLOR.primaryColor,
-          centerTitle: true,
-          elevation: 0,
-          leading: Padding(
-            padding:
-                const EdgeInsets.only(top: 8.0, right: 0, left: 10, bottom: 8),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.of(context).pop();
-              },
-              child: Icon(
-                Icons.arrow_back_ios,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          title: Text(
-            BaseLang.getPrice(),
-            style: TextStyle(
-              fontFamily: 'Quick',
+      appBar: AppBar(
+        brightness: Brightness.dark,
+        backgroundColor: COLOR.primaryColor,
+        centerTitle: true,
+        elevation: 0,
+        leading: Padding(
+          padding:
+              const EdgeInsets.only(top: 8.0, right: 0, left: 10, bottom: 8),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: Icon(
+              Icons.arrow_back_ios,
               color: Colors.white,
             ),
           ),
         ),
-        body: Column(
+        title: Text(
+          BaseLang.getPrice(),
+          style: TextStyle(
+            fontFamily: 'Quick',
+            color: Colors.white,
+          ),
+        ),
+      ),
+      body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -219,68 +220,42 @@ class _PriceScreenState extends State<PriceScreen> {
                 ),
               ),
             ),
-
-            /*SIZE_HEIGHT_LOW,
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    isDense: true,
-                    labelText: BaseLang.getState(),
-                    labelStyle: TextStyle(
-                        fontFamily: "Quick", color: COLOR.primaryColor),
-                    contentPadding: EdgeInsets.all(12.0),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                      borderSide: BorderSide(color: Color(0xFF707070)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                      borderSide: BorderSide(color: Color(0xFF707070)),
-                    ),
-                  ),
-                ),
+            Padding(
+              padding: const EdgeInsets.only(top: 12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                      width: MediaQuery.of(context).size.width / 3,
+                      child: Text("1 Day",
+                          style: TextStyle(color: COLOR.primaryColor))),
+                  Text("Value", style: TextStyle(color: COLOR.primaryColor)),
+                  Text("Changes", style: TextStyle(color: COLOR.primaryColor)),
+                  Text("Sell", style: TextStyle(color: COLOR.primaryColor)),
+                ],
               ),
-              SIZE_HEIGHT_LOWEST,
-              Container(
-                child: Image.asset('assets/images/ic_down.png'),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 9.0),
+                child: ListView.separated(
+                    physics: BouncingScrollPhysics(),
+                    // scrollDirection: Axis.horizontal,
+                    itemCount: 10,
+                    separatorBuilder: (BuildContext context, int index) =>
+                        Divider(
+                          thickness: 1,
+                        ),
+                    itemBuilder: (BuildContext context, int index) {
+                      return PriceComponent();
+                    }),
               ),
-            ],
-          ),
-          SIZE_HEIGHT_LOW,
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    isDense: true,
-                    labelText: BaseLang.getDistrict(),
-                    labelStyle: TextStyle(
-                        fontFamily: "Quick", color: COLOR.primaryColor),
-                    contentPadding: EdgeInsets.all(12.0),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                      borderSide: BorderSide(color: Color(0xFF707070)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                      borderSide: BorderSide(color: Color(0xFF707070)),
-                    ),
-                  ),
-                ),
-              ),
-              SIZE_HEIGHT_LOWEST,
-              Container(
-                child: Image.asset('assets/images/ic_down.png'),
-              ),
-            ],
-          ),
-          SIZE_HEIGHT_LOW,*/
-            SizedBox(
-              height: MediaQuery.of(context).size.width,
-              child: SingleChildScrollView(
-                child: DataTable(
+            )
+          ]),
+    );
+  }
+}
+/*DataTable(
                     dividerThickness: 1,
                     columnSpacing: 40,
                     columns: const <DataColumn>[
@@ -327,10 +302,4 @@ class _PriceScreenState extends State<PriceScreen> {
                           )),
                         ],
                       ),
-                    )),
-              ),
-            ),
-          ],
-        ));
-  }
-}
+                    )),*/

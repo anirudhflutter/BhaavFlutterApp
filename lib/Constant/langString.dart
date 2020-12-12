@@ -254,10 +254,62 @@ class BaseLang {
         : EnglishLang.status;
   }
 
-  static String getmarathi() {
+  static String getmMrathi() {
     return currentLang == LANG.MARATHI
-        ? MarathiLang.MARATHI
-        : EnglishLang.MARATHI;
+        ? MarathiLang.marathi
+        : EnglishLang.marathi;
+  }
+
+  static String getHome() {
+    return currentLang == LANG.MARATHI ? MarathiLang.home : EnglishLang.home;
+  }
+
+  static String getmy_location() {
+    return currentLang == LANG.MARATHI
+        ? MarathiLang.my_location
+        : EnglishLang.my_location;
+  }
+
+  static String getSelect_State() {
+    return currentLang == LANG.MARATHI
+        ? MarathiLang.select_state
+        : EnglishLang.select_state;
+  }
+
+  static String getSelect_City() {
+    return currentLang == LANG.MARATHI
+        ? MarathiLang.select_city
+        : EnglishLang.select_city;
+  }
+
+  static String getEnter_Product_Name() {
+    return currentLang == LANG.MARATHI
+        ? MarathiLang.enter_product_name
+        : EnglishLang.enter_product_name;
+  }
+
+  static String getenter_quantity() {
+    return currentLang == LANG.MARATHI
+        ? MarathiLang.enter_quantity
+        : EnglishLang.enter_quantity;
+  }
+
+  static String getselect_date() {
+    return currentLang == LANG.MARATHI
+        ? MarathiLang.select_date
+        : EnglishLang.select_date;
+  }
+
+  static String getsales_history() {
+    return currentLang == LANG.MARATHI
+        ? MarathiLang.sales_history
+        : EnglishLang.sales_history;
+  }
+
+  static String getfarmer_name() {
+    return currentLang == LANG.MARATHI
+        ? MarathiLang.farmer_name
+        : EnglishLang.farmer_name;
   }
 }
 
@@ -310,7 +362,16 @@ class MarathiLang {
   static String sales = "इतिहास विक्री";
   static String goods = "वस्तू";
   static String status = "स्थिती";
-  static String MARATHI = "मराठी";
+  static String marathi = "मराठी";
+  static String home = "होम";
+  static String my_location = "माझे स्थान";
+  static String select_state = "राज्य निवडा";
+  static String select_city = "शहर निवडा";
+  static String enter_product_name = "उत्पादन नाव प्रविष्ट करा";
+  static String enter_quantity = "प्रमाण प्रविष्ट करा";
+  static String select_date = "तारीख निवडा";
+  static String sales_history = "इतिहास विक्री करा";
+  static String farmer_name = "शेतकरी नाव";
 }
 
 class EnglishLang {
@@ -360,5 +421,14 @@ class EnglishLang {
   static String sales = "Track Sells";
   static String goods = "Goods";
   static String status = "Status";
-  static String MARATHI = "MARATHI";
+  static String marathi = "MARATHI";
+  static String home = "Home";
+  static String my_location = "My Location";
+  static String select_state = "Select State";
+  static String select_city = "Select City";
+  static String enter_product_name = "Enter Product Name";
+  static String enter_quantity = "Enter Quantity";
+  static String select_date = "Select Date";
+  static String sales_history = "Select/History";
+  static String farmer_name = "Farmer Name";
 }
