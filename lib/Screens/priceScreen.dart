@@ -1,9 +1,14 @@
+import 'dart:io';
+
+import 'package:bhaav/Common/Services.dart';
+import 'package:bhaav/Common/constants.dart';
+import 'package:bhaav/Common/langString.dart';
 import 'package:bhaav/Components/PriceComponent.dart';
 import 'package:bhaav/Components/SalesHistoryComponent.dart';
-import 'package:bhaav/constant/constants.dart';
-import 'package:bhaav/constant/langString.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -11,10 +16,35 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  List<String> _locations = ['Maharashtra', 'Gujrat', 'Madhyaprdesh'];
   String _selectState;
-  List<String> _city = ['surat', 'Ahemedabad', 'Mumbai'];
   String _selectCity;
+
+  ProgressDialog pr;
+  bool isLoading = false;
+  List<String> GetStatesData = [], GetCityData = [];
+
+  @override
+  void initState() {
+    GetStates();
+    GetCities();
+    pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
+    pr.style(
+        message: "Please Wait",
+        borderRadius: 10.0,
+        progressWidget: Container(
+          padding: EdgeInsets.all(15),
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(appPrimaryMaterialColor),
+          ),
+        ),
+        elevation: 10.0,
+        insetAnimCurve: Curves.easeInOut,
+        messageTextStyle: TextStyle(
+            color: Colors.red, fontSize: 17.0, fontWeight: FontWeight.w600));
+    // TODO: implement initState
+    super.initState();
+  }
+
   List userData = [
     {
       "id": 1,
@@ -80,6 +110,100 @@ class _PriceScreenState extends State<PriceScreen> {
       "sell": 'assets/images/shipping.png',
     }
   ];
+
+  showMsg(String msg) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("Error"),
+          content: new Text(msg),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  GetStates() async {
+    try {
+      //check Internet Connection
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        setState(() {
+          isLoading = true;
+        });
+        Services.GetStates().then((data) async {
+          if (data.length > 0) {
+            pr.hide();
+            setState(() {
+              isLoading = false;
+            });
+            for (int i = 0; i < data.length; i++) {
+              GetStatesData.add(data[i]["State"]);
+            }
+            print("GetStatesData");
+            print(GetStatesData);
+          }
+        }, onError: (e) {
+          pr.hide();
+          showMsg("Try Again.");
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        pr.hide();
+        showMsg("No Internet Connection.");
+      }
+    } on SocketException catch (_) {
+      showMsg("No Internet Connection.");
+    }
+  }
+
+  GetCities() async {
+    try {
+      //check Internet Connection
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        setState(() {
+          isLoading = true;
+        });
+        Services.GetCities().then((data) async {
+          if (data.length > 0) {
+            pr.hide();
+            setState(() {
+              isLoading = false;
+            });
+            for (int i = 0; i < data.length; i++) {
+              GetCityData.add(data[i]["City"]);
+            }
+            print("GetCityData");
+            print(GetCityData);
+          }
+        }, onError: (e) {
+          pr.hide();
+          showMsg("Try Again.");
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        pr.hide();
+        showMsg("No Internet Connection.");
+      }
+    } on SocketException catch (_) {
+      showMsg("No Internet Connection.");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +289,7 @@ class _PriceScreenState extends State<PriceScreen> {
                           _selectState = newvalue;
                         });
                       },
-                      items: _locations.map(
+                      items: GetStatesData.map(
                         (Location) {
                           return DropdownMenuItem(
                             child: Text(Location),
@@ -207,7 +331,7 @@ class _PriceScreenState extends State<PriceScreen> {
                           _selectCity = newvalue;
                         });
                       },
-                      items: _city.map(
+                      items: GetCityData.map(
                         (Location) {
                           return DropdownMenuItem(
                             child: Text(Location),

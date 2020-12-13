@@ -1,5 +1,5 @@
-import 'package:bhaav/constant/constants.dart';
-import 'package:bhaav/constant/langString.dart';
+import 'package:bhaav/Common/constants.dart';
+import 'package:bhaav/Common/langString.dart';
 import 'package:bhaav/Screens/loginScreen.dart';
 import 'package:bhaav/Screens/signupScreen.dart';
 import 'package:flutter/material.dart';

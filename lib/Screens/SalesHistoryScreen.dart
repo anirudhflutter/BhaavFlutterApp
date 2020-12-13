@@ -1,6 +1,5 @@
+import 'package:bhaav/Common/constants.dart';
 import 'package:bhaav/Components/SalesHistoryComponent.dart';
-import 'package:bhaav/Constant/constants.dart';
-import 'package:bhaav/Constant/langString.dart';
 import 'package:flutter/material.dart';
 
 class SalesHistoryScreen extends StatefulWidget {

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "92898417011",
+    "project_id": "bhaav-443ed",
+    "storage_bucket": "bhaav-443ed.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:92898417011:android:d9c16b70795dc5a019cd06",
+        "android_client_info": {
+          "package_name": "com.itfuturzx.bhaav.bhaav"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "92898417011-c2fs4entvq5lcef1fqq9fgc5811i1nn5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBc31IcqnFuYTUARzHMSyZGs2BK9KZ0y-M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "92898417011-c2fs4entvq5lcef1fqq9fgc5811i1nn5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

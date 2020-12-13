@@ -1,4 +1,4 @@
-import 'package:bhaav/Constant/constants.dart';
+import 'package:bhaav/Common/constants.dart';
 import 'package:flutter/material.dart';
 
 class PriceComponent extends StatefulWidget {

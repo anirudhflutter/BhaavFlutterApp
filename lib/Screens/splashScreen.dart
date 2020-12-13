@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:bhaav/Common/constants.dart';
 import 'package:bhaav/Screens/langSelection.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   /*SplashScreen({Key key}) : super(key: key);
@@ -34,7 +36,16 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     Timer(Duration(seconds: 3), () async {
-      Navigator.of(context).pushReplacementNamed('/LangSelection');
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
+      var mobileNumber = sharedPreferences.getString(mobileNoVerification);
+      print("mobilenumber on splash screen");
+      print(mobileNumber);
+      if (mobileNumber != null) {
+        Navigator.of(context).pushReplacementNamed('/HomeScreen');
+      } else {
+        Navigator.of(context).pushReplacementNamed('/LangSelection');
+      }
     });
   }
 }

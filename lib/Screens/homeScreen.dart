@@ -1,8 +1,13 @@
+import 'dart:io';
+
+import 'package:bhaav/Common/Services.dart';
+import 'package:bhaav/Common/constants.dart';
+import 'package:bhaav/Common/langString.dart';
 import 'package:bhaav/Components/ProductComponent.dart';
-import 'package:bhaav/Constant/langString.dart';
-import 'package:bhaav/constant/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,6 +18,31 @@ class HomeScreen extends StatefulWidget {
 double _value = 10;
 
 class _HomeScreenState extends State<HomeScreen> {
+  ProgressDialog pr;
+  bool isLoading = false;
+  List GetAllProductsData = [], GetStatesData = [];
+
+  @override
+  void initState() {
+    GetAllProducts();
+    pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
+    pr.style(
+        message: "Please Wait",
+        borderRadius: 10.0,
+        progressWidget: Container(
+          padding: EdgeInsets.all(15),
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(appPrimaryMaterialColor),
+          ),
+        ),
+        elevation: 10.0,
+        insetAnimCurve: Curves.easeInOut,
+        messageTextStyle: TextStyle(
+            color: Colors.red, fontSize: 17.0, fontWeight: FontWeight.w600));
+    // TODO: implement initState
+    super.initState();
+  }
+
   _showAlertDialog(BuildContext context) {
     Widget cancelButton = FlatButton(
       child: Text(
@@ -28,6 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
       onPressed: () async {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.clear();
+        print("mobileNoVerification");
+        print(mobileNoVerification);
         Navigator.pushNamedAndRemoveUntil(
             context, '/LoginScreen', (route) => false);
       },
@@ -48,6 +80,67 @@ class _HomeScreenState extends State<HomeScreen> {
         return alert;
       },
     );
+  }
+
+  showMsg(String msg) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("Error"),
+          content: new Text(msg),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  GetAllProducts() async {
+    try {
+      //check Internet Connection
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        pr.show();
+        setState(() {
+          isLoading = true;
+        });
+        Services.GetAllProducts().then((data) async {
+          pr.hide();
+          if (data.Data.length > 0) {
+            Fluttertoast.showToast(
+                msg: "${data.Message}",
+                backgroundColor: Colors.red,
+                gravity: ToastGravity.TOP,
+                toastLength: Toast.LENGTH_SHORT);
+            setState(() {
+              isLoading = false;
+              GetAllProductsData = data.Data;
+            });
+          } else {
+            showMsg("${data.Message}");
+          }
+        }, onError: (e) {
+          showMsg("Try Again.");
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        pr.hide();
+        showMsg("No Internet Connection.");
+      }
+    } on SocketException catch (_) {
+      showMsg("No Internet Connection.");
+    }
   }
 
   @override
@@ -171,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
           centerTitle: true,
           elevation: 0,
           title: Text(
-            "",
+            "Home",
             // BaseLang.getLogin(),
             style: TextStyle(
               fontFamily: 'Quick',
@@ -296,13 +389,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Padding(
               padding: const EdgeInsets.only(top: 15.0),
               child: ListView.builder(
-                  itemCount: 6,
+                  itemCount: GetAllProductsData.length,
                   itemBuilder: (context, index) {
                     return InkWell(
                       onTap: () {
                         Navigator.of(context).pushNamed('/PriceScreen');
                       },
-                      child: ProductComponent(),
+                      child: ProductComponent(
+                          GetAllProductsData: GetAllProductsData, index: index),
                     );
                   }),
             ))

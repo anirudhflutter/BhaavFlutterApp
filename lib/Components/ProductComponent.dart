@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ProductComponent extends StatefulWidget {
+  List GetAllProductsData = [];
+  int index = 0;
+  ProductComponent({this.GetAllProductsData, this.index});
   @override
   _ProductComponentState createState() => _ProductComponentState();
 }
@@ -25,7 +28,8 @@ class _ProductComponentState extends State<ProductComponent> {
                 child: SizedBox(
                   width: 90,
                   height: 90,
-                  child: Image.asset('assets/images/onion.jpg'),
+                  child: Image.asset(
+                      "${widget.GetAllProductsData[widget.index]["productImage"]}"),
                 ),
               ),
 
@@ -33,7 +37,7 @@ class _ProductComponentState extends State<ProductComponent> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    'Onion',
+                    "${widget.GetAllProductsData[widget.index]["productName"]}",
                     style: TextStyle(fontFamily: 'Quick', fontSize: 22),
                   ),
                   Padding(
@@ -58,7 +62,7 @@ class _ProductComponentState extends State<ProductComponent> {
                           Padding(
                             padding: const EdgeInsets.only(top: 3.0),
                             child: Text(
-                              '23₹/Kg',
+                              '${widget.GetAllProductsData[widget.index]["yesterDayPrice"]}₹/Kg',
                             ),
                           ),
                         ],
@@ -86,7 +90,7 @@ class _ProductComponentState extends State<ProductComponent> {
                           Padding(
                             padding: const EdgeInsets.only(top: 1.0, left: 3),
                             child: Text(
-                              '28₹/Kg',
+                              '${widget.GetAllProductsData[widget.index]["toDayPrice"]}₹/Kg',
                               style: TextStyle(
                                   fontFamily: 'Quick',
                                   fontSize: 15,
