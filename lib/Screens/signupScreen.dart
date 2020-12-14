@@ -2,14 +2,22 @@ import 'dart:io';
 
 import 'package:bhaav/Common/Services.dart';
 import 'package:bhaav/Common/constants.dart';
+import 'package:flutter_google_places/flutter_google_places.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:google_maps_webservice/places.dart';
+import 'package:location/location.dart' as loc;
 import 'package:bhaav/Common/langString.dart';
 import 'package:bhaav/firebaseauth/firebase/auth/phone_auth/verify.dart';
 import 'package:bhaav/firebaseauth/providers/phone_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+const kGoogleApiKey = "AIzaSyCm9L8-lLCSpRYME1D4lfMb4CS-oX1U6eQ";
+GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: kGoogleApiKey);
 
 class SignupScreen extends StatefulWidget {
   @override
@@ -19,19 +27,26 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   ProgressDialog pr;
   bool isLoading = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   TextEditingController edtMobileController = new TextEditingController();
   TextEditingController edtNameController = new TextEditingController();
   TextEditingController edtStateController = new TextEditingController();
   TextEditingController edtDistrictController = new TextEditingController();
   TextEditingController edtLocationController = new TextEditingController();
   TextEditingController edtLandSizeOwnedController =
-      new TextEditingController();
+  new TextEditingController();
   List GetAllUsersData = [];
   int checkifuserfound = 0;
   bool userfound = false;
+  var Lat=0.0, Long=0.0;
+  String _selectState,SelectedState="";
+  String _selectCity,SelectedCity="";
+  List<String> GetStatesData = [], GetCityData = [],GetStatesIdData=[],GetCityIdData=[];
 
   @override
   void initState() {
+    GetStates();
+    GetCities();
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
     pr.style(
         message: "Please Wait",
@@ -73,7 +88,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   final scaffoldKey =
-      GlobalKey<ScaffoldState>(debugLabel: "scaffold-get-phone");
+  GlobalKey<ScaffoldState>(debugLabel: "scaffold-get-phone");
 
   _showSnackBar(String text) {
     final snackBar = SnackBar(
@@ -84,17 +99,34 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   startPhoneAuth() async {
+    String stateid="",cityid="";
+    for(int i=0;i<GetStatesData.length;i++){
+      if(SelectedState==GetStatesData[i]){
+        stateid = GetStatesIdData[i];
+        break;
+      }
+    }
+    for(int i=0;i<GetCityData.length;i++){
+      if(SelectedCity==GetCityData[i]){
+        cityid = GetCityIdData[i];
+        break;
+      }
+    }
+    print(stateid);
+    print(cityid);
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setString(mobileNumber, edtMobileController.text);
     sharedPreferences.setString(Nameonsignup, edtNameController.text);
     sharedPreferences.setString(Locationonsignup, edtLocationController.text);
+    sharedPreferences.setDouble(Latitude.toString(), Lat);
+    sharedPreferences.setDouble(Longitude.toString(), Long);
     sharedPreferences.setString(
         Landsizeownedonsignup, edtLandSizeOwnedController.text);
-    sharedPreferences.setString(Stateonsignup, edtStateController.text);
-    sharedPreferences.setString(Districtonsignup, edtDistrictController.text);
+    sharedPreferences.setString(StateonIdsignup, stateid);
+    sharedPreferences.setString(DistrictonIdsignup, cityid);
 
     final phoneAuthDataProvider =
-        Provider.of<PhoneAuthDataProvider>(context, listen: false);
+    Provider.of<PhoneAuthDataProvider>(context, listen: false);
     phoneAuthDataProvider.loading = true;
     bool validPhone = await phoneAuthDataProvider.instantiate(
         phoneNumberField: edtMobileController,
@@ -162,10 +194,181 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  loc.LocationData currentLocation;
+  String address = "";
+
+  getUserLocation() async {
+    loc.LocationData myLocation;
+    String error;
+    loc.Location location = new loc.Location();
+    try {
+      myLocation = await location.getLocation();
+    } on PlatformException catch (e) {
+      if (e.code == 'PERMISSION_DENIED') {
+        error = 'please grant permission';
+        print(error);
+      }
+      if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
+        error = 'permission denied- please enable it from app settings';
+        print(error);
+      }
+      myLocation = null;
+    }
+    currentLocation = myLocation;
+    Lat = currentLocation.latitude;
+    Long = currentLocation.longitude;
+    print("lat");
+    print(Lat);
+    print("Long");
+    print(Long);
+    final coordinates =
+    new Coordinates(myLocation.latitude, myLocation.longitude);
+    var addresses =
+    await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var first = addresses.first;
+    print(
+        ' ${first.locality}, ${first.adminArea},${first.subLocality}, ${first
+            .subAdminArea},${first.addressLine}, ${first.featureName},${first
+            .thoroughfare}, ${first.subThoroughfare}');
+    setState(() {
+      edtLocationController.text = first.addressLine;
+    });
+    return first;
+  }
+
+  final homeScaffoldKey = GlobalKey<ScaffoldState>();
+
+  void onError(PlacesAutocompleteResponse response) {
+    homeScaffoldKey.currentState.showSnackBar(
+      SnackBar(content: Text(response.errorMessage)),
+    );
+  }
+
+  searchPickLocation() async {
+    try {
+      print("Current Location");
+      Prediction p = await PlacesAutocomplete.show(
+        context: context,
+        hint: "Search your location",
+        apiKey: kGoogleApiKey,
+        onError: onError,
+        mode: Mode.overlay,
+        language: "en",
+        components: [
+          Component(Component.country, "in"),
+        ],
+        location: currentLocation == null
+            ? null
+            : Location(currentLocation.latitude, currentLocation.longitude),
+      );
+      PlacesDetailsResponse detail =
+      await _places.getDetailsByPlaceId(p.placeId);
+      setState(() {
+        edtLocationController.text = p.description;
+        Lat = detail.result.geometry.location.lat;
+        Long = detail.result.geometry.location.lng;
+      });
+      Navigator.of(context).pop(true);
+    }
+    catch (e) {
+      return;
+    }
+
+  }
+    void goToNextScreen(screen) {
+      //if from SplashScreen go to LogIn Screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => screen,
+        ),
+      );
+    }
+
+
+
+  GetStates() async {
+    try {
+      //check Internet Connection
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        setState(() {
+          isLoading = true;
+        });
+        Services.GetStates().then((data) async {
+          if (data.length > 0) {
+            pr.hide();
+            setState(() {
+              isLoading = false;
+            });
+            for (int i = 0; i < data.length; i++) {
+              GetStatesData.add(data[i]["State"]);
+            }
+            for (int i = 0; i < data.length; i++) {
+              GetStatesIdData.add(data[i]["_id"]);
+            }
+            print("GetStatesData");
+            print(GetStatesData);
+          }
+        }, onError: (e) {
+          pr.hide();
+          showMsg("Try Again.");
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        pr.hide();
+        showMsg("No Internet Connection.");
+      }
+    } on SocketException catch (_) {
+      showMsg("No Internet Connection.");
+    }
+  }
+
+  GetCities() async {
+    try {
+      //check Internet Connection
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        setState(() {
+          isLoading = true;
+        });
+        Services.GetCities().then((data) async {
+          if (data.length > 0) {
+            pr.hide();
+            setState(() {
+              isLoading = false;
+            });
+            for (int i = 0; i < data.length; i++) {
+              GetCityData.add(data[i]["City"]);
+            }
+            for (int i = 0; i < data.length; i++) {
+              GetCityIdData.add(data[i]["_id"]);
+            }
+            print("GetCityData");
+            print(GetCityData);
+          }
+        }, onError: (e) {
+          pr.hide();
+          showMsg("Try Again.");
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        pr.hide();
+        showMsg("No Internet Connection.");
+      }
+    } on SocketException catch (_) {
+      showMsg("No Internet Connection.");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: scaffoldKey,
+      key: _scaffoldKey,
       appBar: AppBar(
         brightness: Brightness.dark,
         backgroundColor: COLOR.primaryColor,
@@ -173,7 +376,7 @@ class _SignupScreenState extends State<SignupScreen> {
         elevation: 0,
         leading: Padding(
           padding:
-              const EdgeInsets.only(top: 8.0, right: 0, left: 10, bottom: 8),
+          const EdgeInsets.only(top: 8.0, right: 0, left: 10, bottom: 8),
           child: GestureDetector(
             onTap: () {
               Navigator.of(context)
@@ -231,7 +434,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   isDense: true,
                   labelText: BaseLang.getFullName(),
                   labelStyle:
-                      TextStyle(fontFamily: "Quick", color: COLOR.primaryColor),
+                  TextStyle(fontFamily: "Quick", color: COLOR.primaryColor),
                   contentPadding: EdgeInsets.all(12.0),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(4.0)),
@@ -251,7 +454,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   isDense: true,
                   labelText: BaseLang.getMobileNo(),
                   labelStyle:
-                      TextStyle(fontFamily: "Quick", color: COLOR.primaryColor),
+                  TextStyle(fontFamily: "Quick", color: COLOR.primaryColor),
                   contentPadding: EdgeInsets.all(12.0),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(4.0)),
@@ -268,22 +471,81 @@ class _SignupScreenState extends State<SignupScreen> {
                 children: [
                   Expanded(
                     child: TextField(
+                      onTap: () {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                    BorderRadius.circular(20.0)),
+                                //this right here
+                                child: Container(
+                                  height: 200,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment
+                                          .center,
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .start,
+                                      children: [
+                                        SizedBox(
+                                          width: 320.0,
+                                          child: RaisedButton(
+                                            onPressed: () {
+                                              getUserLocation();
+                                              Navigator.of(context).pop(true);
+                                            },
+                                            child: Text(
+                                              "Get Current Location",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                            color: const Color(0xFF1BC0C5),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 320.0,
+                                          child: RaisedButton(
+                                            onPressed: () {
+                                              searchPickLocation();
+                                            },
+                                            child: Text(
+                                              "Find Location",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                            color: const Color(0xFF1BC0C5),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            });
+                      },
                       controller: edtLocationController,
                       decoration: InputDecoration(
                         isDense: true,
-                        labelText: BaseLang.getLocation(),
+                        labelText: edtLocationController.text=="" ? BaseLang.getLocation():edtLocationController.text,
                         labelStyle: TextStyle(
                             fontFamily: "Quick", color: COLOR.primaryColor),
                         contentPadding: EdgeInsets.all(12.0),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                          borderRadius: BorderRadius.all(
+                              Radius.circular(4.0)),
                           borderSide: BorderSide(color: Color(0xFF707070)),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                          borderRadius: BorderRadius.all(
+                              Radius.circular(4.0)),
                           borderSide: BorderSide(color: Color(0xFF707070)),
                         ),
                       ),
+                      minLines: 2,
+                      maxLines: 4,
                     ),
                   ),
                   SIZE_HEIGHT_LOW,
@@ -317,15 +579,15 @@ class _SignupScreenState extends State<SignupScreen> {
                         counterText: "",
                         enabledBorder: OutlineInputBorder(
                           borderSide:
-                              BorderSide(color: Color(0xFF707070), width: 1),
+                          BorderSide(color: Color(0xFF707070), width: 1),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderSide:
-                              BorderSide(color: Color(0xFF707070), width: 1),
+                          BorderSide(color: Color(0xFF707070), width: 1),
                         ),
                         border: OutlineInputBorder(
                           borderSide:
-                              BorderSide(color: Color(0xFF707070), width: 1),
+                          BorderSide(color: Color(0xFF707070), width: 1),
                         ),
                       ),
                     ),
@@ -337,64 +599,91 @@ class _SignupScreenState extends State<SignupScreen> {
                 ],
               ),
               SIZE_HEIGHT_LOW,
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: edtStateController,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        labelText: BaseLang.getState(),
-                        labelStyle: TextStyle(
-                            fontFamily: "Quick", color: COLOR.primaryColor),
-                        contentPadding: EdgeInsets.all(12.0),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                          borderSide: BorderSide(color: Color(0xFF707070)),
+              Padding(
+                padding: const EdgeInsets.only(top: 22.0, left: 15, right: 15),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(
+                        color: COLOR.primaryColor,
+                        style: BorderStyle.solid,
+                        width: 0.80),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 5.0, right: 5),
+                      child: DropdownButton(
+                        dropdownColor: Colors.white,
+                        hint: Text("Select State"),
+                        icon: Icon(
+                          Icons.arrow_drop_down,
+                          size: 40,
+                          color: COLOR.primaryColor,
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                          borderSide: BorderSide(color: Color(0xFF707070)),
-                        ),
+                        isExpanded: true,
+                        value: _selectState,
+                        onChanged: (newvalue) {
+                          SelectedState = newvalue;
+                          setState(() {
+                            _selectState = newvalue;
+                          });
+                        },
+                        items: GetStatesData.map(
+                              (Location) {
+                            return DropdownMenuItem(
+                              child: Text(Location),
+                              value: Location,
+                            );
+                          },
+                        ).toList(),
                       ),
                     ),
                   ),
-                  SIZE_HEIGHT_LOWEST,
-                  Container(
-                    child: Image.asset('assets/images/ic_down.png'),
-                  ),
-                ],
+                ),
               ),
-              SIZE_HEIGHT_LOW,
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: edtDistrictController,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        labelText: BaseLang.getDistrict(),
-                        labelStyle: TextStyle(
-                            fontFamily: "Quick", color: COLOR.primaryColor),
-                        contentPadding: EdgeInsets.all(12.0),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                          borderSide: BorderSide(color: Color(0xFF707070)),
+              Padding(
+                padding: const EdgeInsets.only(
+                    top: 22.0, left: 15, right: 15, bottom: 10),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(
+                        color: COLOR.primaryColor,
+                        style: BorderStyle.solid,
+                        width: 0.80),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 5.0, right: 5),
+                      child: DropdownButton(
+                        dropdownColor: Colors.white,
+                        hint: Text("Select City"),
+                        icon: Icon(
+                          Icons.arrow_drop_down,
+                          size: 40,
+                          color: COLOR.primaryColor,
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                          borderSide: BorderSide(color: Color(0xFF707070)),
-                        ),
+                        isExpanded: true,
+                        value: _selectCity,
+                        onChanged: (newvalue) {
+                          SelectedCity = newvalue;
+                          setState(() {
+                            _selectCity = newvalue;
+                          });
+                        },
+                        items: GetCityData.map(
+                              (Location) {
+                            return DropdownMenuItem(
+                              child: Text(Location),
+                              value: Location,
+                            );
+                          },
+                        ).toList(),
                       ),
                     ),
                   ),
-                  SIZE_HEIGHT_LOWEST,
-                  Container(
-                    child: Image.asset('assets/images/ic_down.png'),
-                  ),
-                ],
+                ),
               ),
-              SIZE_HEIGHT_LOW,
               Align(
                 alignment: Alignment.center,
                 child: InkWell(
@@ -404,8 +693,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         edtNameController.text == "" ||
                         edtLocationController.text == "" ||
                         edtLandSizeOwnedController.text == "" ||
-                        edtStateController.text == "" ||
-                        edtDistrictController.text == "") {
+                        _selectState == "" ||
+                        _selectCity == "") {
                       showMsg("Please try again");
                     } else {
                       checkUser();
@@ -437,13 +726,4 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  void goToNextScreen(screen) {
-    //if from SplashScreen go to LogIn Screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => screen,
-      ),
-    );
   }
-}

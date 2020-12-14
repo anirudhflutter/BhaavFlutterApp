@@ -6,6 +6,7 @@ import 'package:bhaav/firebaseauth/providers/phone_auth.dart';
 import 'package:bhaav/firebaseauth/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
@@ -186,24 +187,39 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
 
           SizedBox(height: 16.0),
 
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              getPinField(key: "1", focusNode: focusNode1),
-              SizedBox(width: 5.0),
-              getPinField(key: "2", focusNode: focusNode2),
-              SizedBox(width: 5.0),
-              getPinField(key: "3", focusNode: focusNode3),
-              SizedBox(width: 5.0),
-              getPinField(key: "4", focusNode: focusNode4),
-              SizedBox(width: 5.0),
-              getPinField(key: "5", focusNode: focusNode5),
-              SizedBox(width: 5.0),
-              getPinField(key: "6", focusNode: focusNode6),
-              SizedBox(width: 5.0),
-            ],
+          // Row(
+          //   mainAxisSize: MainAxisSize.min,
+          //   children: <Widget>[
+          //     getPinField(key: "1", focusNode: focusNode1),
+          //     SizedBox(width: 5.0),
+          //     getPinField(key: "2", focusNode: focusNode2),
+          //     SizedBox(width: 5.0),
+          //     getPinField(key: "3", focusNode: focusNode3),
+          //     SizedBox(width: 5.0),
+          //     getPinField(key: "4", focusNode: focusNode4),
+          //     SizedBox(width: 5.0),
+          //     getPinField(key: "5", focusNode: focusNode5),
+          //     SizedBox(width: 5.0),
+          //     getPinField(key: "6", focusNode: focusNode6),
+          //     SizedBox(width: 5.0),
+          //   ],
+          // ),
+          PinCodeTextField(
+            appContext: context,
+            pastedTextStyle: TextStyle(
+              color: Colors.green.shade600,
+              fontWeight: FontWeight.bold,
+            ),
+            length: 6,
+            keyboardType: TextInputType.number,
+            obscureText: false,
+            // obscuringCharacter: '*',
+            animationType: AnimationType.fade,
+            onCompleted: (pin){
+              code=pin;
+              print("completed");
+            },
           ),
-
           SizedBox(height: 32.0),
 
           RaisedButton(
@@ -426,12 +442,12 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
         var data = {
           "name": sharedPreferences.getString(Nameonsignup),
           "mobile": sharedPreferences.getString(mobileNumber),
-          "lat": "21.785",
-          "long": "72.165",
+          "lat": sharedPreferences.getDouble(Latitude.toString()),
+          "long": sharedPreferences.getDouble(Longitude.toString()),
           "completeAddress": sharedPreferences.getString(Locationonsignup),
           "landSizeOwned": sharedPreferences.getString(Landsizeownedonsignup),
-          "state": sharedPreferences.getString(Stateonsignup),
-          "city": sharedPreferences.getString(Districtonsignup)
+          "state": sharedPreferences.getString(StateonIdsignup),
+          "city": sharedPreferences.getString(DistrictonIdsignup)
         };
 
         Services.RegisterUser(data).then((data) async {
