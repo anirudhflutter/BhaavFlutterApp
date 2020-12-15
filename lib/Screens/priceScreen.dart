@@ -5,12 +5,17 @@ import 'package:bhaav/Common/constants.dart';
 import 'package:bhaav/Common/langString.dart';
 import 'package:bhaav/Components/PriceComponent.dart';
 import 'package:bhaav/Components/SalesHistoryComponent.dart';
+import 'package:bhaav/Screens/priceDetailScreen.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
 class PriceScreen extends StatefulWidget {
+  String eachProductId = "";
+  int index = 0;
+  PriceScreen({this.eachProductId, this.index});
   @override
   _PriceScreenState createState() => _PriceScreenState();
 }
@@ -23,8 +28,71 @@ class _PriceScreenState extends State<PriceScreen> {
   bool isLoading = false;
   List<String> GetStatesData = [], GetCityData = [];
 
+  String selectedDate;
+  List getProductDetailsData = [];
+
+  showMsg(String msg) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("Error"),
+          content: new Text(msg),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  getProductDetails() async {
+    try {
+      //check Internet Connection
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        setState(() {
+          isLoading = true;
+        });
+        var data = {
+          "productId": widget.eachProductId.toString(),
+        };
+        Services.getProductDetails(data).then((data) async {
+          if (data.Data.length > 0) {
+            setState(() {
+              isLoading = false;
+              getProductDetailsData = data.Data;
+            });
+          } else {
+            showMsg("${data.Message}");
+          }
+        }, onError: (e) {
+          showMsg("Try Again.");
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        pr.hide();
+        showMsg("No Internet Connection.");
+      }
+    } on SocketException catch (_) {
+      showMsg("No Internet Connection.");
+    }
+  }
+
   @override
   void initState() {
+    print("tapped product id");
+    print(widget.eachProductId);
+    getProductDetails();
     GetStates();
     GetCities();
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
@@ -110,28 +178,6 @@ class _PriceScreenState extends State<PriceScreen> {
       "sell": 'assets/images/shipping.png',
     }
   ];
-
-  showMsg(String msg) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return AlertDialog(
-          title: new Text("Error"),
-          content: new Text(msg),
-          actions: <Widget>[
-            // usually buttons at the bottom of the dialog
-            new FlatButton(
-              child: new Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   GetStates() async {
     try {
@@ -234,148 +280,210 @@ class _PriceScreenState extends State<PriceScreen> {
           ),
         ),
       ),
-      body: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      body: getProductDetailsData.length == 0
+          ? Center(child: CircularProgressIndicator())
+          : Column(
               mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 15.0, top: 12),
-                  child: Image.asset(
-                    'assets/images/onion.jpg',
-                    height: 110,
-                    width: 110,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 35.0),
-                  child: Text(
-                    'Onion',
-                    style: TextStyle(
-                        fontSize: 22,
-                        fontFamily: 'Quick',
-                        fontWeight: FontWeight.bold),
-                  ),
-                )
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 22.0, left: 15, right: 15),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(
-                      color: COLOR.primaryColor,
-                      style: BorderStyle.solid,
-                      width: 0.80),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 5.0, right: 5),
-                    child: DropdownButton(
-                      dropdownColor: Colors.white,
-                      hint: Text("Select State"),
-                      icon: Icon(
-                        Icons.arrow_drop_down,
-                        size: 40,
-                        color: COLOR.primaryColor,
-                      ),
-                      isExpanded: true,
-                      value: _selectState,
-                      onChanged: (newvalue) {
-                        setState(() {
-                          _selectState = newvalue;
-                        });
-                      },
-                      items: GetStatesData.map(
-                        (Location) {
-                          return DropdownMenuItem(
-                            child: Text(Location),
-                            value: Location,
-                          );
-                        },
-                      ).toList(),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(
-                  top: 22.0, left: 15, right: 15, bottom: 10),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(
-                      color: COLOR.primaryColor,
-                      style: BorderStyle.solid,
-                      width: 0.80),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 5.0, right: 5),
-                    child: DropdownButton(
-                      dropdownColor: Colors.white,
-                      hint: Text("Select City"),
-                      icon: Icon(
-                        Icons.arrow_drop_down,
-                        size: 40,
-                        color: COLOR.primaryColor,
-                      ),
-                      isExpanded: true,
-                      value: _selectCity,
-                      onChanged: (newvalue) {
-                        setState(() {
-                          _selectCity = newvalue;
-                        });
-                      },
-                      items: GetCityData.map(
-                        (Location) {
-                          return DropdownMenuItem(
-                            child: Text(Location),
-                            value: Location,
-                          );
-                        },
-                      ).toList(),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Container(
-                      width: MediaQuery.of(context).size.width / 3,
-                      child: Text("1 Day",
-                          style: TextStyle(color: COLOR.primaryColor))),
-                  Text("Value", style: TextStyle(color: COLOR.primaryColor)),
-                  Text("Changes", style: TextStyle(color: COLOR.primaryColor)),
-                  Text("Sell", style: TextStyle(color: COLOR.primaryColor)),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 9.0),
-                child: ListView.separated(
-                    physics: BouncingScrollPhysics(),
-                    // scrollDirection: Axis.horizontal,
-                    itemCount: 10,
-                    separatorBuilder: (BuildContext context, int index) =>
-                        Divider(
-                          thickness: 1,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 15.0, top: 12),
+                        child: Image.asset(
+                          "${getProductDetailsData[widget.index]["productId"]["productImage"]}",
+                          height: 110,
+                          width: 110,
                         ),
-                    itemBuilder: (BuildContext context, int index) {
-                      return PriceComponent();
-                    }),
-              ),
-            )
-          ]),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 35.0),
+                        child: Text(
+                          "${getProductDetailsData[widget.index]["productId"]["productName"]}",
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontFamily: 'Quick',
+                              fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    ],
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(top: 22.0, left: 15, right: 15),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(
+                            color: COLOR.primaryColor,
+                            style: BorderStyle.solid,
+                            width: 0.80),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 5.0, right: 5),
+                          child: DropdownButton(
+                            dropdownColor: Colors.white,
+                            hint: Text("Select State"),
+                            icon: Icon(
+                              Icons.arrow_drop_down,
+                              size: 40,
+                              color: COLOR.primaryColor,
+                            ),
+                            isExpanded: true,
+                            value: _selectState,
+                            onChanged: (newvalue) {
+                              setState(() {
+                                _selectState = newvalue;
+                              });
+                            },
+                            items: GetStatesData.map(
+                              (Location) {
+                                return DropdownMenuItem(
+                                  child: Text(Location),
+                                  value: Location,
+                                );
+                              },
+                            ).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 22.0, left: 15, right: 15, bottom: 10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(
+                            color: COLOR.primaryColor,
+                            style: BorderStyle.solid,
+                            width: 0.80),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 5.0, right: 5),
+                          child: DropdownButton(
+                            dropdownColor: Colors.white,
+                            hint: Text("Select City"),
+                            icon: Icon(
+                              Icons.arrow_drop_down,
+                              size: 40,
+                              color: COLOR.primaryColor,
+                            ),
+                            isExpanded: true,
+                            value: _selectCity,
+                            onChanged: (newvalue) {
+                              setState(() {
+                                _selectCity = newvalue;
+                              });
+                            },
+                            items: GetCityData.map(
+                              (Location) {
+                                return DropdownMenuItem(
+                                  child: Text(Location),
+                                  value: Location,
+                                );
+                              },
+                            ).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Container(
+                            width: MediaQuery.of(context).size.width / 3,
+                            child: Text("1 Day",
+                                style: TextStyle(color: COLOR.primaryColor))),
+                        Text("Value",
+                            style: TextStyle(color: COLOR.primaryColor)),
+                        Text("Changes",
+                            style: TextStyle(color: COLOR.primaryColor)),
+                        Text("Sell",
+                            style: TextStyle(color: COLOR.primaryColor)),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 9.0),
+                      child: ListView.separated(
+                          physics: BouncingScrollPhysics(),
+                          // scrollDirection: Axis.horizontal,
+                          itemCount: 10,
+                          separatorBuilder: (BuildContext context, int index) =>
+                              Divider(
+                                thickness: 1,
+                              ),
+                          itemBuilder: (BuildContext context, int index) {
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PriceDetailScreen(
+                                      productName:
+                                          getProductDetailsData[widget.index]
+                                              ["productId"]["productName"],
+                                      index: index,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Container(
+                                    width:
+                                        MediaQuery.of(context).size.width / 3,
+                                    child: Text(
+                                      "${getProductDetailsData[widget.index]["mandiId"]["MandiName"]}",
+                                    ),
+                                  ),
+                                  Column(
+                                    children: [
+                                      Text(
+                                        "${getProductDetailsData[widget.index]["productId"]["yesterDayPrice"]}" +
+                                            ".00",
+                                      ),
+                                      Text(
+                                        "${getProductDetailsData[widget.index]["productId"]["toDayPrice"]}" +
+                                            ".00",
+                                      ),
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      Text(
+                                        "${getProductDetailsData[widget.index]["productId"]["priceChangeIndicator"]}" +
+                                            ".00",
+                                      ),
+                                      Text(
+                                        "${getProductDetailsData[widget.index]["productId"]["toDayPrice"]}",
+                                      ),
+                                    ],
+                                  ),
+                                  Image.asset(
+                                    "assets/images/shipping.png",
+                                    color: COLOR.primaryColor,
+                                    height: 30,
+                                    width: 30,
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                    ),
+                  )
+                ]),
     );
   }
 }

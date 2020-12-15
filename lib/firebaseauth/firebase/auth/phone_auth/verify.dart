@@ -215,8 +215,8 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
             obscureText: false,
             // obscuringCharacter: '*',
             animationType: AnimationType.fade,
-            onCompleted: (pin){
-              code=pin;
+            onCompleted: (pin) {
+              code = pin;
               print("completed");
             },
           ),
@@ -361,12 +361,15 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
         setState(() {
           isLoading = true;
         });
-
+        print("request to loginUser function");
+        print(mobileNumber);
         var data = {
           "mobile": mobileNumber,
         };
         Services.LoginUser(data).then((data) async {
           pr.hide();
+          print("response from loginUser function");
+          print(data);
           if (data != 0) {
             pr.hide();
             Fluttertoast.showToast(
@@ -439,6 +442,16 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
         });
         SharedPreferences sharedPreferences =
             await SharedPreferences.getInstance();
+        print("request data to registerUser function");
+        print(sharedPreferences.getString(Nameonsignup));
+        print(sharedPreferences.getString(mobileNumber));
+        print(sharedPreferences.getDouble(Latitude.toString()));
+        print(sharedPreferences.getString(Longitude.toString()));
+        print(sharedPreferences.getString(Locationonsignup));
+        print(sharedPreferences.getString(Landsizeownedonsignup));
+        print(sharedPreferences.getString(StateonIdsignup));
+        print(sharedPreferences.getString(DistrictonIdsignup));
+
         var data = {
           "name": sharedPreferences.getString(Nameonsignup),
           "mobile": sharedPreferences.getString(mobileNumber),
@@ -453,6 +466,8 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
         Services.RegisterUser(data).then((data) async {
           pr.hide();
           if (data.IsSuccess == true) {
+            print("response data from registerUser function");
+            print(data);
             pr.hide();
             Fluttertoast.showToast(
                 msg: "${data.Message}",

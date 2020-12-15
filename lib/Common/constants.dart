@@ -21,8 +21,10 @@ String mobileNoVerification = "",
     mobileNumber = "",
     Nameonsignup = "",
     Locationonsignup = "",
-    Landsizeownedonsignup = "",StateonIdsignup="",DistrictonIdsignup="";
-var Latitude=0.0,Longitude=0.0;
+    Landsizeownedonsignup = "",
+    StateonIdsignup = "",
+    DistrictonIdsignup = "";
+var Latitude = 0.0, Longitude = 0.0;
 
 const SIZE_HEIGHT_NORMAL = SizedBox(
   height: 25,

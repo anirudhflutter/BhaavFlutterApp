@@ -83,6 +83,31 @@ class Services {
     }
   }
 
+  static Future<GetAllProductsDataClass> getProductDetails(body) async {
+    String url = cnst.API_URL + 'api/product/getProductDetails';
+    print("getProductDetails url : " + url);
+    try {
+      final response = await dio.post(url, data: body);
+      List list = [];
+      if (response.statusCode == 200) {
+        GetAllProductsDataClass saveData =
+            new GetAllProductsDataClass(Message: 'No Data', IsSuccess: false);
+        print("getProductDetails Response: " + response.data.toString());
+        var memberDataClass = response.data;
+        saveData.Message = memberDataClass["Message"];
+        saveData.IsSuccess = memberDataClass["IsSuccess"];
+        saveData.Data = memberDataClass["Data"];
+
+        return saveData;
+      } else {
+        throw Exception(response.data.toString());
+      }
+    } catch (e) {
+      print("getProductDetails Error ${e.toString()}");
+      throw Exception(e.toString());
+    }
+  }
+
   static Future<List> GetStates() async {
     String url = cnst.API_URL + 'api/admin/getState';
     print("GetStates url : " + url);

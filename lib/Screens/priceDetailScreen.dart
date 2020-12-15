@@ -1,13 +1,20 @@
+import 'dart:io';
+
+import 'package:bhaav/Common/Services.dart';
 import 'package:bhaav/Common/constants.dart';
 import 'package:bhaav/Common/langString.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class PriceDetailScreen extends StatefulWidget {
-  PriceDetailScreen({Key key}) : super(key: key);
+  int index = 0;
+  String productName = "";
+  PriceDetailScreen({this.productName, this.index});
 
   @override
   _PriceDetailScreenState createState() => _PriceDetailScreenState();
@@ -15,6 +22,7 @@ class PriceDetailScreen extends StatefulWidget {
 
 class _PriceDetailScreenState extends State<PriceDetailScreen> {
   String selectedDate;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,7 +72,7 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                     Padding(
                       padding: const EdgeInsets.only(left: 35.0),
                       child: Text(
-                        'Onion',
+                        "${widget.productName}",
                         style: TextStyle(
                             fontSize: 22,
                             fontFamily: 'Quick',

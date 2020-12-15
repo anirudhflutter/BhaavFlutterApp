@@ -4,6 +4,8 @@ import 'package:bhaav/Common/Services.dart';
 import 'package:bhaav/Common/constants.dart';
 import 'package:bhaav/Common/langString.dart';
 import 'package:bhaav/Components/ProductComponent.dart';
+import 'package:bhaav/Screens/priceDetailScreen.dart';
+import 'package:bhaav/Screens/priceScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -103,6 +105,8 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
+
+  List SearchData = [];
 
   GetAllProducts() async {
     try {
@@ -369,6 +373,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderSide: BorderSide(color: Color(0xCCF07544)),
                           ),
                         ),
+                        onChanged: (value) {
+                          print("changed");
+                        },
                       ),
                     ),
                     Padding(
@@ -393,7 +400,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     return InkWell(
                       onTap: () {
-                        Navigator.of(context).pushNamed('/PriceScreen');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PriceScreen(
+                              eachProductId: GetAllProductsData[index]["_id"],
+                              index: index,
+                            ),
+                          ),
+                        );
                       },
                       child: ProductComponent(
                           GetAllProductsData: GetAllProductsData, index: index),
