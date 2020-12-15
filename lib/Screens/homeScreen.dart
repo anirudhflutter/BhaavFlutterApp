@@ -8,25 +8,38 @@ import 'package:bhaav/Screens/priceDetailScreen.dart';
 import 'package:bhaav/Screens/priceScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:location/location.dart' as loc;
+import 'package:flutter_google_places/flutter_google_places.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:google_maps_webservice/places.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-double _value = 10;
+double _value = 0;
+double areaToBeSearched = 0;
 
 class _HomeScreenState extends State<HomeScreen> {
   ProgressDialog pr;
+  String farmerId = "";
   bool isLoading = false;
-  List GetAllProductsData = [], GetStatesData = [];
+  String selectMandi = "";
+  List GetMandiData = [];
+  List GetAllMandiData = [],
+      GetStatesData = [],
+      GetFarmerProductData = [];
+  List dropDownMandiData = [];
 
   @override
   void initState() {
-    GetAllProducts();
+    GetLocalData();
+    getUserLocation();
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
     pr.style(
         message: "Please Wait",
@@ -43,6 +56,49 @@ class _HomeScreenState extends State<HomeScreen> {
             color: Colors.red, fontSize: 17.0, fontWeight: FontWeight.w600));
     // TODO: implement initState
     super.initState();
+  }
+
+  loc.LocationData currentLocation;
+  String address = "";
+  double Lat = 0.0, Long = 0.0;
+
+  GetLocalData() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    farmerId = sharedPreferences.getString(FarmerId);
+  }
+
+  getUserLocation() async {
+    loc.LocationData myLocation;
+    String error;
+    loc.Location location = new loc.Location();
+    try {
+      myLocation = await location.getLocation();
+    } on PlatformException catch (e) {
+      if (e.code == 'PERMISSION_DENIED') {
+        error = 'please grant permission';
+        print(error);
+      }
+      if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
+        error = 'permission denied- please enable it from app settings';
+        print(error);
+      }
+      myLocation = null;
+    }
+    currentLocation = myLocation;
+    Lat = currentLocation.latitude;
+    Long = currentLocation.longitude;
+    print("lat");
+    print(Lat);
+    print("Long");
+    print(Long);
+    final coordinates =
+        new Coordinates(myLocation.latitude, myLocation.longitude);
+    var addresses =
+        await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var first = addresses.first;
+    print(
+        ' ${first.locality}, ${first.adminArea},${first.subLocality}, ${first.subAdminArea},${first.addressLine}, ${first.featureName},${first.thoroughfare}, ${first.subThoroughfare}');
+    return first;
   }
 
   _showAlertDialog(BuildContext context) {
@@ -107,8 +163,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List SearchData = [];
+  List copyofMandiData = [];
 
-  GetAllProducts() async {
+  getNearMandi(double areaToBeSearched) async {
     try {
       //check Internet Connection
       final result = await InternetAddress.lookup('google.com');
@@ -117,20 +174,85 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           isLoading = true;
         });
-        Services.GetAllProducts().then((data) async {
+        print("request sent to allmandidata");
+        print(areaToBeSearched);
+        print(Lat);
+        print(Long);
+        var data = {
+          "uptoKm": areaToBeSearched,
+          "userLat": Lat,
+          "userLong": Long,
+        };
+        Services.getNearMandi(data).then((data) async {
           pr.hide();
-          if (data.Data.length > 0) {
-            Fluttertoast.showToast(
-                msg: "${data.Message}",
-                backgroundColor: Colors.red,
-                gravity: ToastGravity.TOP,
-                toastLength: Toast.LENGTH_SHORT);
+          if (data.length > 0) {
+            // Fluttertoast.showToast(
+            //     msg: data["Message"],
+            //     backgroundColor: Colors.red,
+            //     gravity: ToastGravity.TOP,
+            //     toastLength: Toast.LENGTH_SHORT);
+            GetAllMandiData = data;
+            copyofMandiData = GetAllMandiData;
+            for (int i = 0; i < GetAllMandiData.length; i++) {
+              dropDownMandiData
+                  .add(GetAllMandiData[i]["mandiData"]["MandiName"].toString());
+            }
+            print("dropDownMandiData");
+            print(dropDownMandiData);
             setState(() {
               isLoading = false;
-              GetAllProductsData = data.Data;
             });
           } else {
-            showMsg("${data.Message}");
+            // showMsg(data["Message"]);
+          }
+        }, onError: (e) {
+          showMsg("Try Again.");
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        pr.hide();
+        showMsg("No Internet Connection.");
+      }
+    } on SocketException catch (_) {
+      showMsg("No Internet Connection.");
+    }
+  }
+
+  getMandiProducts(String selectedMandi) async {
+    try {
+      String selectedMandiId = "";
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        pr.show();
+        setState(() {
+          isLoading = true;
+        });
+        for (int i = 0; i < copyofMandiData.length; i++) {
+          if (selectedMandi == copyofMandiData[i]["mandiData"]["MandiName"]) {
+            selectedMandiId = copyofMandiData[i]["mandiData"]["_id"];
+            break;
+          }
+        }
+        var data = {
+          "mandiId": selectedMandiId, // pass selectedmandiId
+        };
+        Services.getMandiProducts(data).then((data) async {
+          pr.hide();
+          if (data.length > 0) {
+            // Fluttertoast.showToast(
+            //     msg: "${data.Message}",
+            //     backgroundColor: Colors.red,
+            //     gravity: ToastGravity.TOP,
+            //     toastLength: Toast.LENGTH_SHORT);
+            setState(() {
+              isLoading = false;
+              GetMandiData = data;
+            });
+            getUserLocation();
+          } else {
+            // showMsg("${data.Message}");
           }
         }, onError: (e) {
           showMsg("Try Again.");
@@ -311,10 +433,11 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Slider(
                 value: _value,
                 min: 0,
-                max: 100,
+                max: 30,
                 divisions: 10,
-                label: '$_value' + 'm',
+                label: '$_value' + 'km',
                 onChanged: (value) {
+                  print(value.runtimeType);
                   setState(
                     () {
                       _value = value;
@@ -324,28 +447,85 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SIZE_HEIGHT_LOW,
-            Padding(
-              padding: const EdgeInsets.only(left: 6.0, right: 6),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: "Nearest Mandi Name",
-                  isDense: true,
-                  labelText: "My Location",
-                  //BaseLang.getFullName(),
-                  labelStyle:
-                      TextStyle(fontFamily: "Quick", color: COLOR.primaryColor),
-                  contentPadding: EdgeInsets.all(12.0),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                    borderSide: BorderSide(color: Colors.grey),
+            Center(
+              child: RaisedButton(
+                child: Text(
+                  "Search",
+                  style: TextStyle(
+                    fontFamily: 'Quick',
+                    color: Colors.white,
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                    borderSide: BorderSide(color: Colors.grey),
+                ),
+                color: COLOR.primaryColor,
+                onPressed: () {
+                  dropDownMandiData.clear();
+                  print("_value");
+                  print(_value);
+                  getNearMandi(_value);
+                }
+                  ),
+                  ),
+                  Padding(
+                  padding: const EdgeInsets.only(top: 5.0, left: 6, right: 41),
+                  child: Container(
+                  decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                  color: COLOR.primaryColor,
+                  style: BorderStyle.solid,
+                  width: 0.80,
+                  ),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                  child: Padding(
+                  padding: const EdgeInsets.only(left: 2.0),
+                  child: DropdownButton<dynamic>(
+                  dropdownColor: Colors.white,
+                      hint: Text("Select Mandi"),
+                      icon: Icon(
+                        Icons.arrow_drop_down,
+                        size: 40,
+                        color: COLOR.primaryColor,
+                      ),
+                      isExpanded: true,
+                      value: selectMandi,
+                      onChanged: (newvalue) {
+                        getMandiProducts(selectMandi);
+                      },
+                      items: dropDownMandiData.map(
+                        (dynamic Location) {
+                          return DropdownMenuItem<dynamic>(
+                            child: Text(Location.toString()),
+                            value: Location.toString(),
+                          );
+                        },
+                      ).toList(),
+                    ),
                   ),
                 ),
               ),
             ),
+            // Padding(
+            //   padding: const EdgeInsets.only(left: 6.0, right: 6),
+            //   child: TextField(
+            //     decoration: InputDecoration(
+            //       isDense: true,
+            //       labelText: "My Location",
+            //       labelStyle:
+            //           TextStyle(fontFamily: "Quick", color: COLOR.primaryColor),
+            //       contentPadding: EdgeInsets.all(12.0),
+            //       enabledBorder: OutlineInputBorder(
+            //         borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            //         borderSide: BorderSide(color: Colors.grey),
+            //       ),
+            //       focusedBorder: OutlineInputBorder(
+            //         borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            //         borderSide: BorderSide(color: Colors.grey),
+            //       ),
+            //     ),
+            //     controller: edtLocationController,
+            //   ),
+            // ),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
               child: Padding(
@@ -392,36 +572,51 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            Expanded(
-                child: Padding(
-              padding: const EdgeInsets.only(top: 15.0),
-              child: ListView.builder(
-                  itemCount: GetAllProductsData.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PriceScreen(
-                              eachProductId: GetAllProductsData[index]["_id"],
-                              index: index,
+            areaToBeSearched == 0.0
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 100.0),
+                    child: Center(
+                      child: Text(
+                        "Please Specify Area and mandi to be searched \n Currently it is set to 0",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  )
+                : Expanded(
+                    child: Padding(
+                    padding: const EdgeInsets.only(top: 15.0),
+                    child: ListView.builder(
+                        itemCount: GetMandiData.length,
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PriceScreen(
+                                    eachProductId: GetMandiData[index]
+                                        ["_id"],
+                                    index: index,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: ProductComponent(
+                              GetAllProductsData: GetMandiData[index]["productId"],
                             ),
-                          ),
-                        );
-                      },
-                      child: ProductComponent(
-                          GetAllProductsData: GetAllProductsData, index: index),
-                    );
-                  }),
-            ))
+                          );
+                        }),
+                  ))
           ],
         ),
       ),
     );
   }
 
-  /* void goToNextScreen(screen) {
+/* void goToNextScreen(screen) {
     //if from SplashScreen go to LogIn Screen
     Navigator.push(
       context,

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ProductComponent extends StatefulWidget {
-  List GetAllProductsData = [];
-  int index = 0;
-  ProductComponent({this.GetAllProductsData, this.index});
+  Map GetAllProductsData ;
+  ProductComponent({this.GetAllProductsData});
   @override
   _ProductComponentState createState() => _ProductComponentState();
 }
@@ -29,7 +28,7 @@ class _ProductComponentState extends State<ProductComponent> {
                   width: 90,
                   height: 90,
                   child: Image.asset(
-                      "${widget.GetAllProductsData[widget.index]["productImage"]}"),
+                      "${widget.GetAllProductsData["productImage"]}"),
                 ),
               ),
 
@@ -37,7 +36,7 @@ class _ProductComponentState extends State<ProductComponent> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    "${widget.GetAllProductsData[widget.index]["productName"]}",
+                    "${widget.GetAllProductsData["productName"]}",
                     style: TextStyle(fontFamily: 'Quick', fontSize: 22),
                   ),
                   Padding(
@@ -62,7 +61,7 @@ class _ProductComponentState extends State<ProductComponent> {
                           Padding(
                             padding: const EdgeInsets.only(top: 3.0),
                             child: Text(
-                              '${widget.GetAllProductsData[widget.index]["yesterDayPrice"]}₹/Kg',
+                              '${widget.GetAllProductsData["yesterDayPrice"]}₹/Kg',
                             ),
                           ),
                         ],
@@ -90,7 +89,7 @@ class _ProductComponentState extends State<ProductComponent> {
                           Padding(
                             padding: const EdgeInsets.only(top: 1.0, left: 3),
                             child: Text(
-                              '${widget.GetAllProductsData[widget.index]["toDayPrice"]}₹/Kg',
+                              '${widget.GetAllProductsData["toDayPrice"]}₹/Kg',
                               style: TextStyle(
                                   fontFamily: 'Quick',
                                   fontSize: 15,

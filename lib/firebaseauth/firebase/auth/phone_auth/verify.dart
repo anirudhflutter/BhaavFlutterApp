@@ -372,11 +372,11 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
           print(data);
           if (data != 0) {
             pr.hide();
-            Fluttertoast.showToast(
-                msg: "User Logged In Successfully",
-                backgroundColor: Colors.red,
-                gravity: ToastGravity.TOP,
-                toastLength: Toast.LENGTH_SHORT);
+            // Fluttertoast.showToast(
+            //     msg: "User Logged In Successfully",
+            //     backgroundColor: Colors.red,
+            //     gravity: ToastGravity.TOP,
+            //     toastLength: Toast.LENGTH_SHORT);
             Navigator.pushNamedAndRemoveUntil(
                 context, '/HomeScreen', (route) => false);
           } else {
@@ -446,7 +446,7 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
         print(sharedPreferences.getString(Nameonsignup));
         print(sharedPreferences.getString(mobileNumber));
         print(sharedPreferences.getDouble(Latitude.toString()));
-        print(sharedPreferences.getString(Longitude.toString()));
+        print(sharedPreferences.getDouble(Longitude.toString()));
         print(sharedPreferences.getString(Locationonsignup));
         print(sharedPreferences.getString(Landsizeownedonsignup));
         print(sharedPreferences.getString(StateonIdsignup));
@@ -468,6 +468,7 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
           if (data.IsSuccess == true) {
             print("response data from registerUser function");
             print(data);
+            sharedPreferences.setString(FarmerId, data.Data["_id"]);
             pr.hide();
             Fluttertoast.showToast(
                 msg: "${data.Message}",

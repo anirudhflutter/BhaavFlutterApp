@@ -12,9 +12,8 @@ import 'package:progress_dialog/progress_dialog.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class PriceDetailScreen extends StatefulWidget {
-  int index = 0;
-  String productName = "";
-  PriceDetailScreen({this.productName, this.index});
+  Map individualProductData;
+  PriceDetailScreen({this.individualProductData});
 
   @override
   _PriceDetailScreenState createState() => _PriceDetailScreenState();
@@ -72,7 +71,7 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                     Padding(
                       padding: const EdgeInsets.only(left: 35.0),
                       child: Text(
-                        "${widget.productName}",
+                        "${widget.individualProductData["productId"]["productName"]}",
                         style: TextStyle(
                             fontSize: 22,
                             fontFamily: 'Quick',

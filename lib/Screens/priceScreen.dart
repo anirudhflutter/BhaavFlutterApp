@@ -26,7 +26,7 @@ class _PriceScreenState extends State<PriceScreen> {
 
   ProgressDialog pr;
   bool isLoading = false;
-  List<String> GetStatesData = [], GetCityData = [];
+  List GetDataForStates = [], GetDataForCities = [],StatesDropDown=[],CitiesDropDown=[];
 
   String selectedDate;
   List getProductDetailsData = [];
@@ -62,7 +62,7 @@ class _PriceScreenState extends State<PriceScreen> {
           isLoading = true;
         });
         var data = {
-          "productId": widget.eachProductId.toString(),
+          "productId": "5fd72eb08de495584afb27c4",
         };
         Services.getProductDetails(data).then((data) async {
           if (data.Data.length > 0) {
@@ -70,6 +70,8 @@ class _PriceScreenState extends State<PriceScreen> {
               isLoading = false;
               getProductDetailsData = data.Data;
             });
+            print("getProductDetailsData");
+            print(getProductDetailsData);
           } else {
             showMsg("${data.Message}");
           }
@@ -94,7 +96,6 @@ class _PriceScreenState extends State<PriceScreen> {
     print(widget.eachProductId);
     getProductDetails();
     GetStates();
-    GetCities();
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
     pr.style(
         message: "Please Wait",
@@ -113,72 +114,6 @@ class _PriceScreenState extends State<PriceScreen> {
     super.initState();
   }
 
-  List userData = [
-    {
-      "id": 1,
-      "name": "Sardar Market",
-      "value": ["15.0", "18.0"],
-      "changes": ["+3.00", "+25.00%"],
-      "sell": 'assets/images/shipping.png',
-    },
-    {
-      "id": 2,
-      "name": "ramji Market",
-      "value": ["10.0", "15.0"],
-      "changes": ["+4.00", "+30.00%"],
-      "sell": 'assets/images/shipping.png',
-    },
-    {
-      "id": 3,
-      "name": "chowta Market",
-      "value": ["18.0", "20.0"],
-      "changes": ["+5.00", "+20.00%"],
-      "sell": 'assets/images/shipping.png',
-    },
-    {
-      "id": 4,
-      "name": "Baroda Market",
-      "value": ["16.0", "19.0"],
-      "changes": ["+1.00", "+26.00%"],
-      "sell": 'assets/images/shipping.png',
-    },
-    {
-      "id": 5,
-      "name": "Baroda Market",
-      "value": ["16.0", "19.0"],
-      "changes": ["+1.00", "+26.00%"],
-      "sell": 'assets/images/shipping.png',
-    },
-    {
-      "id": 6,
-      "name": "Baroda Market",
-      "value": ["16.0", "19.0"],
-      "changes": ["+1.00", "+26.00%"],
-      "sell": 'assets/images/shipping.png',
-    },
-    {
-      "id": 7,
-      "name": "Baroda Market",
-      "value": ["16.0", "19.0"],
-      "changes": ["+1.00", "+26.00%"],
-      "sell": 'assets/images/shipping.png',
-    },
-    {
-      "id": 8,
-      "name": "Baroda Market",
-      "value": ["16.0", "19.0"],
-      "changes": ["+1.00", "+26.00%"],
-      "sell": 'assets/images/shipping.png',
-    },
-    {
-      "id": 9,
-      "name": "Baroda Market",
-      "value": ["16.0", "19.0"],
-      "changes": ["+1.00", "+26.00%"],
-      "sell": 'assets/images/shipping.png',
-    }
-  ];
-
   GetStates() async {
     try {
       //check Internet Connection
@@ -192,12 +127,13 @@ class _PriceScreenState extends State<PriceScreen> {
             pr.hide();
             setState(() {
               isLoading = false;
+              GetDataForStates = data;
             });
-            for (int i = 0; i < data.length; i++) {
-              GetStatesData.add(data[i]["State"]);
+            for(int i=0;i<GetDataForStates.length;i++){
+              StatesDropDown.add(GetDataForStates[i]["State"]);
             }
-            print("GetStatesData");
-            print(GetStatesData);
+            print("GetDataForStates");
+            print(GetDataForStates);
           }
         }, onError: (e) {
           pr.hide();
@@ -215,8 +151,10 @@ class _PriceScreenState extends State<PriceScreen> {
     }
   }
 
-  GetCities() async {
+  GetCities(String selectedStateId) async {
     try {
+      print("selectedStateId");
+      print(selectedStateId);
       //check Internet Connection
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
@@ -228,12 +166,18 @@ class _PriceScreenState extends State<PriceScreen> {
             pr.hide();
             setState(() {
               isLoading = false;
+              GetDataForCities = data;
             });
-            for (int i = 0; i < data.length; i++) {
-              GetCityData.add(data[i]["City"]);
+            print("GetDataForCities");
+            print(GetDataForCities);
+            for (int i = 0; i < GetDataForCities.length; i++) {
+              if(selectedStateId==GetDataForCities[i]["State"]["_id"].toString()){
+                print("found");
+                CitiesDropDown.add(GetDataForCities[i]["City"]);
+              }
             }
-            print("GetCityData");
-            print(GetCityData);
+            print("CitiesDropDown");
+            print(CitiesDropDown);
           }
         }, onError: (e) {
           pr.hide();
@@ -334,11 +278,19 @@ class _PriceScreenState extends State<PriceScreen> {
                             isExpanded: true,
                             value: _selectState,
                             onChanged: (newvalue) {
+                              for(int i=0;i<GetDataForStates.length;i++){
+                                if(newvalue==GetDataForStates[i]["State"]){
+                                  GetCities(GetDataForStates[i]["_id"]);
+                                  print('GetDataForStates[i]["_id"]');
+                                  print(GetDataForStates[i]["_id"]);
+                                  break;
+                                }
+                              }
                               setState(() {
                                 _selectState = newvalue;
                               });
                             },
-                            items: GetStatesData.map(
+                            items: StatesDropDown.map(
                               (Location) {
                                 return DropdownMenuItem(
                                   child: Text(Location),
@@ -380,7 +332,7 @@ class _PriceScreenState extends State<PriceScreen> {
                                 _selectCity = newvalue;
                               });
                             },
-                            items: GetCityData.map(
+                            items: CitiesDropDown.map(
                               (Location) {
                                 return DropdownMenuItem(
                                   child: Text(Location),
@@ -429,10 +381,8 @@ class _PriceScreenState extends State<PriceScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => PriceDetailScreen(
-                                      productName:
-                                          getProductDetailsData[widget.index]
-                                              ["productId"]["productName"],
-                                      index: index,
+                                      individualProductData:
+                                          getProductDetailsData[widget.index],
                                     ),
                                   ),
                                 );

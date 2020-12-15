@@ -62,3 +62,34 @@ class GetAllProductsClass {
     );
   }
 }
+
+  class dropdownMandiClass {
+  String Message;
+  bool IsSuccess;
+  int Count=0;
+  List<dropdownclass> Data;
+
+  dropdownMandiClass({this.IsSuccess,this.Message,this.Data,this.Count});
+
+  factory dropdownMandiClass.fromJson(Map<String, dynamic > json) {
+  return dropdownMandiClass(
+  Message: json['Message'] as String,
+  IsSuccess: json['IsSuccess'] as bool,
+  Count: json["Count"] as int,
+  Data: json['Data']
+      .map<dropdownclass>((json) => dropdownclass.fromJson(json))
+      .toList());
+  }
+  }
+
+  class dropdownclass {
+  String MandiName;
+
+  dropdownclass({ this.MandiName});
+
+  factory dropdownclass.fromJson(Map<String, dynamic> json) {
+  return dropdownclass(
+    MandiName: json["mandiData"]['MandiName'] as String,
+  );
+  }
+  }

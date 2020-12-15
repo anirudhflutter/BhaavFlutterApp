@@ -35,6 +35,7 @@ class _SignupScreenState extends State<SignupScreen> {
   TextEditingController edtLocationController = new TextEditingController();
   TextEditingController edtLandSizeOwnedController =
   new TextEditingController();
+
   List GetAllUsersData = [];
   int checkifuserfound = 0;
   bool userfound = false;

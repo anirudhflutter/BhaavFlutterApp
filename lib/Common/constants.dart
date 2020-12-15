@@ -23,7 +23,7 @@ String mobileNoVerification = "",
     Locationonsignup = "",
     Landsizeownedonsignup = "",
     StateonIdsignup = "",
-    DistrictonIdsignup = "";
+    DistrictonIdsignup = "",FarmerId="";
 var Latitude = 0.0, Longitude = 0.0;
 
 const SIZE_HEIGHT_NORMAL = SizedBox(

@@ -58,27 +58,50 @@ class Services {
     }
   }
 
-  static Future<GetAllProductsDataClass> GetAllProducts() async {
-    String url = cnst.API_URL + 'api/product/getProducts';
-    print("GetAllProducts url : " + url);
+  static Future<List> getNearMandi(body) async {
+    String url = cnst.API_URL + 'api/mandi/getNearMandi';
+    print("getNearMandi url : " + url);
     try {
-      final response = await dio.post(url);
-      List list = [];
+      final response = await dio.post(url,data: body);
       if (response.statusCode == 200) {
-        GetAllProductsDataClass saveData =
-            new GetAllProductsDataClass(Message: 'No Data', IsSuccess: false);
-        print("GetAllProducts Response: " + response.data.toString());
+        List list =[];
         var memberDataClass = response.data;
-        saveData.Message = memberDataClass["Message"];
-        saveData.IsSuccess = memberDataClass["IsSuccess"];
-        saveData.Data = memberDataClass["Data"];
-
-        return saveData;
+        if (memberDataClass["Data"] != 0) {
+          print(memberDataClass["Data"]);
+          list = memberDataClass["Data"];
+        } else {
+          list = [];
+        }
+        return list;
       } else {
         throw Exception(response.data.toString());
       }
     } catch (e) {
-      print("GetAllProducts Error ${e.toString()}");
+      print("getNearMandi Error ${e.toString()}");
+      throw Exception(e.toString());
+    }
+  }
+
+  static Future<List> getMandiProducts(body) async {
+    String url = cnst.API_URL + 'api/product/getMandiProducts';
+    print("getMandiProducts url : " + url);
+    try {
+      final response = await dio.post(url,data: body);
+      List list = [];
+      if (response.statusCode == 200) {
+        var memberDataClass = response.data;
+        if (memberDataClass["Data"] != 0) {
+          print(memberDataClass["Data"]);
+          list = memberDataClass["Data"];
+        } else {
+          list = [];
+        }
+        return list;
+      } else {
+        throw Exception(response.data.toString());
+      }
+    } catch (e) {
+      print("getMandiProducts Error ${e.toString()}");
       throw Exception(e.toString());
     }
   }
