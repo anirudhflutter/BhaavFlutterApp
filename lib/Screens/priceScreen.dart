@@ -130,7 +130,9 @@ class _PriceScreenState extends State<PriceScreen> {
               GetDataForStates = data;
             });
             for(int i=0;i<GetDataForStates.length;i++){
-              StatesDropDown.add(GetDataForStates[i]["State"]);
+              if(!StatesDropDown.contains(GetDataForStates[i]["State"])) {
+                StatesDropDown.add(GetDataForStates[i]["State"]);
+              }
             }
             print("GetDataForStates");
             print(GetDataForStates);
@@ -173,7 +175,9 @@ class _PriceScreenState extends State<PriceScreen> {
             for (int i = 0; i < GetDataForCities.length; i++) {
               if(selectedStateId==GetDataForCities[i]["State"]["_id"].toString()){
                 print("found");
-                CitiesDropDown.add(GetDataForCities[i]["City"]);
+                if(!CitiesDropDown.contains(GetDataForCities[i]["City"])) {
+                  CitiesDropDown.add(GetDataForCities[i]["City"]);
+                }
               }
             }
             print("CitiesDropDown");
@@ -278,6 +282,7 @@ class _PriceScreenState extends State<PriceScreen> {
                             isExpanded: true,
                             value: _selectState,
                             onChanged: (newvalue) {
+                              CitiesDropDown.clear();
                               for(int i=0;i<GetDataForStates.length;i++){
                                 if(newvalue==GetDataForStates[i]["State"]){
                                   GetCities(GetDataForStates[i]["_id"]);

@@ -102,7 +102,10 @@ class _ProductComponentState extends State<ProductComponent> {
                   )
                 ],
               ),
-              Padding(
+              widget.GetAllProductsData["yesterDayPrice"] < widget.GetAllProductsData["toDayPrice"] ? Padding(
+                padding: const EdgeInsets.only(right: 15.0),
+                child: Image.asset('assets/images/arrow_up.png'),
+              ):Padding(
                 padding: const EdgeInsets.only(right: 15.0),
                 child: Image.asset('assets/images/arrow_down.png'),
               ),

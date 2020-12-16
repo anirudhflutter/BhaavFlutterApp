@@ -5,8 +5,8 @@ import 'package:bhaav/Screens/signupScreen.dart';
 import 'package:flutter/material.dart';
 
 class AuthenticationScreen extends StatefulWidget {
-  AuthenticationScreen({Key key}) : super(key: key);
-
+  String LanguageSelected="";
+AuthenticationScreen({this.LanguageSelected});
   @override
   _AuthenticationScreenState createState() => _AuthenticationScreenState();
 }
@@ -30,7 +30,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
               const EdgeInsets.only(top: 8.0, right: 0, left: 10, bottom: 8),
           child: GestureDetector(
             onTap: () {
-              Navigator.of(context).pop();
+              Navigator.of(context).pushReplacementNamed('/LangSelection');
             },
             child: Icon(
               Icons.arrow_back_ios,
@@ -84,7 +84,8 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                           ),
                         ),
                       ),
-                      Text(BaseLang.getLogin(),
+                      Text(
+                          BaseLang.getLogin(),
                           style: TextStyle(
                             fontSize: TextSize.FONT_NORMAL,
                             fontFamily: 'Quick',

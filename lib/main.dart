@@ -3,6 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+
+
+
+
+
+
+
+
+
+
+
+
 import 'Screens/SalesHistoryScreen.dart';
 import 'Screens/authenticationScreen.dart';
 import 'Screens/calculateIncomeScreen.dart';
@@ -34,26 +46,26 @@ class MyApp extends StatelessWidget {
           create: (context) => PhoneAuthDataProvider(),
         ),
       ],
-      child: MaterialApp(
-          title: 'Bhaav',
-          debugShowCheckedModeBanner: false,
-          initialRoute: '/',
-          theme: ThemeData(
-            primarySwatch: Colors.orange,
-            visualDensity: VisualDensity.adaptivePlatformDensity,
-          ),
-          routes: {
-            '/': (context) => SplashScreen(),
-            '/LangSelection': (context) => LangSelection(),
-            '/LoginScreen': (context) => LoginScreen(),
-            '/SignupScreen': (context) => SignupScreen(),
-            '/HomeScreen': (context) => HomeScreen(),
-            '/AuthenticationScreen': (context) => AuthenticationScreen(),
-            '/PriceScreen': (context) => PriceScreen(),
-            '/PriceDetailScreen': (context) => PriceDetailScreen(),
-            '/calculateIncomeScreen': (context) => calculateIncomeScreen(),
-            '/SalesHistoryScreen': (context) => SalesHistoryScreen(),
-          }),
+      child:MaterialApp(
+              title: 'Bhaav',
+              debugShowCheckedModeBanner: false,
+              initialRoute: '/',
+              theme: ThemeData(
+                primarySwatch: Colors.orange,
+                visualDensity: VisualDensity.adaptivePlatformDensity,
+              ),
+              routes: {
+                '/': (context) => SplashScreen(),
+                '/LangSelection': (context) => LangSelection(),
+                '/LoginScreen': (context) => LoginScreen(),
+                '/SignupScreen': (context) => SignupScreen(),
+                '/HomeScreen': (context) => HomeScreen(),
+                '/AuthenticationScreen': (context) => AuthenticationScreen(),
+                '/PriceScreen': (context) => PriceScreen(),
+                '/PriceDetailScreen': (context) => PriceDetailScreen(),
+                '/calculateIncomeScreen': (context) => calculateIncomeScreen(),
+                '/SalesHistoryScreen': (context) => SalesHistoryScreen(),
+              }),
     );
   }
 }

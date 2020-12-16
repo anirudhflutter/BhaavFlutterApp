@@ -94,6 +94,9 @@ class _LangSelectionState extends State<LangSelection> {
                       onTap: () {
                         setState(() {
                           BaseLang.currentLang = LANG.MARATHI;
+                          Navigator.push(context, 
+                          MaterialPageRoute(builder: (context) => AuthenticationScreen(LanguageSelected:"Marathi"))
+                          );
                           Navigator.of(context)
                               .pushNamed('/AuthenticationScreen');
                         });

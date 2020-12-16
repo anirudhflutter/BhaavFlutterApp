@@ -29,11 +29,9 @@ class _HomeScreenState extends State<HomeScreen> {
   ProgressDialog pr;
   String farmerId = "";
   bool isLoading = false;
-  String selectMandi = "";
+  String selectMandi;
   List GetMandiData = [];
-  List GetAllMandiData = [],
-      GetStatesData = [],
-      GetFarmerProductData = [];
+  List GetAllMandiData = [], GetStatesData = [], GetFarmerProductData = [];
   List dropDownMandiData = [];
 
   @override
@@ -194,8 +192,11 @@ class _HomeScreenState extends State<HomeScreen> {
             GetAllMandiData = data;
             copyofMandiData = GetAllMandiData;
             for (int i = 0; i < GetAllMandiData.length; i++) {
-              dropDownMandiData
-                  .add(GetAllMandiData[i]["mandiData"]["MandiName"].toString());
+              if(!dropDownMandiData.contains(GetAllMandiData[i]["mandiData"]["MandiName"])) {
+                dropDownMandiData
+                    .add(
+                    GetAllMandiData[i]["mandiData"]["MandiName"].toString());
+              }
             }
             print("dropDownMandiData");
             print(dropDownMandiData);
@@ -235,9 +236,14 @@ class _HomeScreenState extends State<HomeScreen> {
             break;
           }
         }
+        print("selectedMandi");
+        print(selectedMandi);
+        print("selectedMandiId");
+        print(selectedMandiId);
         var data = {
           "mandiId": selectedMandiId, // pass selectedmandiId
         };
+        GetMandiData.clear();
         Services.getMandiProducts(data).then((data) async {
           pr.hide();
           if (data.length > 0) {
@@ -436,6 +442,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 max: 30,
                 divisions: 10,
                 label: '$_value' + 'km',
+                onChangeEnd: (value){
+                  dropDownMandiData.clear();
+                  GetMandiData.clear();
+                  print("_value");
+                  print(_value);
+                  getNearMandi(_value);
+                },
                 onChanged: (value) {
                   print(value.runtimeType);
                   setState(
@@ -447,40 +460,36 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SIZE_HEIGHT_LOW,
-            Center(
-              child: RaisedButton(
-                child: Text(
-                  "Search",
-                  style: TextStyle(
-                    fontFamily: 'Quick',
-                    color: Colors.white,
-                  ),
-                ),
-                color: COLOR.primaryColor,
-                onPressed: () {
-                  dropDownMandiData.clear();
-                  print("_value");
-                  print(_value);
-                  getNearMandi(_value);
-                }
-                  ),
-                  ),
-                  Padding(
-                  padding: const EdgeInsets.only(top: 5.0, left: 6, right: 41),
-                  child: Container(
-                  decoration: BoxDecoration(
+            // Center(
+            //   child: RaisedButton(
+            //       child: Text(
+            //         "Search",
+            //         style: TextStyle(
+            //           fontFamily: 'Quick',
+            //           color: Colors.white,
+            //         ),
+            //       ),
+            //       color: COLOR.primaryColor,
+            //       onPressed: () {
+            //
+            //       }),
+            // ),
+            Padding(
+              padding: const EdgeInsets.only(top: 5.0, left: 6, right: 41),
+              child: Container(
+                decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8.0),
                   border: Border.all(
-                  color: COLOR.primaryColor,
-                  style: BorderStyle.solid,
-                  width: 0.80,
+                    color: COLOR.primaryColor,
+                    style: BorderStyle.solid,
+                    width: 0.80,
                   ),
-                  ),
-                  child: DropdownButtonHideUnderline(
+                ),
+                child: DropdownButtonHideUnderline(
                   child: Padding(
-                  padding: const EdgeInsets.only(left: 2.0),
-                  child: DropdownButton<dynamic>(
-                  dropdownColor: Colors.white,
+                    padding: const EdgeInsets.only(left: 2.0),
+                    child: DropdownButton<dynamic>(
+                      dropdownColor: Colors.white,
                       hint: Text("Select Mandi"),
                       icon: Icon(
                         Icons.arrow_drop_down,
@@ -490,13 +499,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       isExpanded: true,
                       value: selectMandi,
                       onChanged: (newvalue) {
+                        setState(() {
+                          selectMandi = newvalue;
+                        });
                         getMandiProducts(selectMandi);
                       },
                       items: dropDownMandiData.map(
-                        (dynamic Location) {
-                          return DropdownMenuItem<dynamic>(
-                            child: Text(Location.toString()),
-                            value: Location.toString(),
+                        (Location) {
+                          return DropdownMenuItem(
+                            child: Text(Location),
+                            value: Location,
                           );
                         },
                       ).toList(),
@@ -572,12 +584,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            areaToBeSearched == 0.0
+            GetMandiData.length==0
                 ? Padding(
                     padding: const EdgeInsets.only(top: 100.0),
                     child: Center(
                       child: Text(
-                        "Please Specify Area and mandi to be searched \n Currently it is set to 0",
+                        "No Data Found",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
@@ -597,15 +609,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => PriceScreen(
-                                    eachProductId: GetMandiData[index]
-                                        ["_id"],
+                                    eachProductId: GetMandiData[index]["_id"],
                                     index: index,
                                   ),
                                 ),
                               );
                             },
                             child: ProductComponent(
-                              GetAllProductsData: GetMandiData[index]["productId"],
+                              GetAllProductsData: GetMandiData[index]
+                                  ["productId"],
                             ),
                           );
                         }),
