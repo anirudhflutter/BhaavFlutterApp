@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:http/http.dart';
 import 'package:bhaav/Common/Services.dart';
 import 'package:bhaav/Common/constants.dart';
 import 'package:bhaav/Common/langString.dart';
@@ -32,10 +32,10 @@ class _HomeScreenState extends State<HomeScreen> {
   String selectMandi;
   List GetMandiData = [];
   List GetAllMandiData = [], GetStatesData = [], GetFarmerProductData = [];
-  List dropDownMandiData = [];
 
   @override
   void initState() {
+    getAllMandi();
     GetLocalData();
     getUserLocation();
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
@@ -161,9 +161,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List SearchData = [];
-  List copyofMandiData = [];
 
-  getNearMandi(double areaToBeSearched) async {
+  getAllMandi() async {
     try {
       //check Internet Connection
       final result = await InternetAddress.lookup('google.com');
@@ -172,35 +171,12 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           isLoading = true;
         });
-        print("request sent to allmandidata");
-        print(areaToBeSearched);
-        print(Lat);
-        print(Long);
-        var data = {
-          "uptoKm": areaToBeSearched,
-          "userLat": Lat,
-          "userLong": Long,
-        };
-        Services.getNearMandi(data).then((data) async {
+        Services.getAllMandi().then((data) async {
           pr.hide();
           if (data.length > 0) {
-            // Fluttertoast.showToast(
-            //     msg: data["Message"],
-            //     backgroundColor: Colors.red,
-            //     gravity: ToastGravity.TOP,
-            //     toastLength: Toast.LENGTH_SHORT);
             GetAllMandiData = data;
-            copyofMandiData = GetAllMandiData;
-            for (int i = 0; i < GetAllMandiData.length; i++) {
-              if(!dropDownMandiData.contains(GetAllMandiData[i]["mandiData"]["MandiName"])) {
-                dropDownMandiData
-                    .add(
-                    GetAllMandiData[i]["mandiData"]["MandiName"].toString());
-              }
-            }
-            print("dropDownMandiData");
-            print(dropDownMandiData);
             setState(() {
+              selectMandi = null;
               isLoading = false;
             });
           } else {
@@ -223,42 +199,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   getMandiProducts(String selectedMandi) async {
     try {
-      String selectedMandiId = "";
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
         pr.show();
         setState(() {
           isLoading = true;
         });
-        for (int i = 0; i < copyofMandiData.length; i++) {
-          if (selectedMandi == copyofMandiData[i]["mandiData"]["MandiName"]) {
-            selectedMandiId = copyofMandiData[i]["mandiData"]["_id"];
-            break;
-          }
-        }
-        print("selectedMandi");
-        print(selectedMandi);
-        print("selectedMandiId");
-        print(selectedMandiId);
-        var data = {
-          "mandiId": selectedMandiId, // pass selectedmandiId
-        };
+        print(selectMandi);
+        // var data = {
+        //   "mandiId": selectedMandi, // pass selectedmandiId
+        // };
         GetMandiData.clear();
-        Services.getMandiProducts(data).then((data) async {
+        Services.getMandiProducts(selectedMandi).then((data) async {
           pr.hide();
           if (data.length > 0) {
-            // Fluttertoast.showToast(
-            //     msg: "${data.Message}",
-            //     backgroundColor: Colors.red,
-            //     gravity: ToastGravity.TOP,
-            //     toastLength: Toast.LENGTH_SHORT);
             setState(() {
               isLoading = false;
               GetMandiData = data;
             });
+            print("getmandiData");
+            print(GetMandiData);
             getUserLocation();
           } else {
-            // showMsg("${data.Message}");
+            showMsg("");
           }
         }, onError: (e) {
           showMsg("Try Again.");
@@ -275,8 +238,21 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  List filteredData = [];
+  getFilteredData(String value){
+     for(int i=0;i<GetMandiData.length;i++){
+       if(GetMandiData[i].toString().contains(value.toLowerCase()) || GetMandiData[i].toString().contains(value.toUpperCase())){
+        filteredData.add(GetMandiData[i]);
+        setState(() {
+          GetMandiData = filteredData;
+        });
+       }
+     }
+  }
+
   @override
   Widget build(BuildContext context) {
+    print(selectMandi);
     return Scaffold(
       drawer: Drawer(
         child: Column(
@@ -410,55 +386,55 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 15, left: 5),
-              child: Text(
-                "Area to be searched",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-            ),
-            SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                activeTrackColor: Colors.red[700],
-                inactiveTrackColor: Colors.red[100],
-                trackShape: RoundedRectSliderTrackShape(),
-                trackHeight: 4.0,
-                thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
-                thumbColor: Colors.redAccent,
-                overlayColor: Colors.red.withAlpha(32),
-                overlayShape: RoundSliderOverlayShape(overlayRadius: 28.0),
-                tickMarkShape: RoundSliderTickMarkShape(),
-                activeTickMarkColor: Colors.red[700],
-                inactiveTickMarkColor: Colors.red[100],
-                valueIndicatorShape: PaddleSliderValueIndicatorShape(),
-                valueIndicatorColor: Colors.redAccent,
-                valueIndicatorTextStyle: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
-              child: Slider(
-                value: _value,
-                min: 0,
-                max: 30,
-                divisions: 10,
-                label: '$_value' + 'km',
-                onChangeEnd: (value){
-                  dropDownMandiData.clear();
-                  GetMandiData.clear();
-                  print("_value");
-                  print(_value);
-                  getNearMandi(_value);
-                },
-                onChanged: (value) {
-                  print(value.runtimeType);
-                  setState(
-                    () {
-                      _value = value;
-                    },
-                  );
-                },
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(top: 15, left: 5),
+            //   child: Text(
+            //     "Area to be searched",
+            //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            //   ),
+            // ),
+            // SliderTheme(
+            //   data: SliderTheme.of(context).copyWith(
+            //     activeTrackColor: Colors.red[700],
+            //     inactiveTrackColor: Colors.red[100],
+            //     trackShape: RoundedRectSliderTrackShape(),
+            //     trackHeight: 4.0,
+            //     thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
+            //     thumbColor: Colors.redAccent,
+            //     overlayColor: Colors.red.withAlpha(32),
+            //     overlayShape: RoundSliderOverlayShape(overlayRadius: 28.0),
+            //     tickMarkShape: RoundSliderTickMarkShape(),
+            //     activeTickMarkColor: Colors.red[700],
+            //     inactiveTickMarkColor: Colors.red[100],
+            //     valueIndicatorShape: PaddleSliderValueIndicatorShape(),
+            //     valueIndicatorColor: Colors.redAccent,
+            //     valueIndicatorTextStyle: TextStyle(
+            //       color: Colors.white,
+            //     ),
+            //   ),
+            //   child: Slider(
+            //     value: _value,
+            //     min: 0,
+            //     max: 30,
+            //     divisions: 10,
+            //     label: '$_value' + 'km',
+            //     onChangeEnd: (value){
+            //       dropDownMandiData.clear();
+            //       GetMandiData.clear();
+            //       print("_value");
+            //       print(_value);
+            //       getNearMandi();
+            //     },
+            //     onChanged: (value) {
+            //       print(value.runtimeType);
+            //       setState(
+            //         () {
+            //           _value = value;
+            //         },
+            //       );
+            //     },
+            //   ),
+            // ),
             SIZE_HEIGHT_LOW,
             // Center(
             //   child: RaisedButton(
@@ -499,12 +475,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       isExpanded: true,
                       value: selectMandi,
                       onChanged: (newvalue) {
+                        String selectedmandiId="";
                         setState(() {
                           selectMandi = newvalue;
                         });
+                        // for(int i=0;i<GetAllMandiData.length;i++){
+                        //   if(GetAllMandiData[i]["MandiName"].toString().replaceAll(".csv", "")==selectMandi){
+                        //     selectedmandiId = GetAllMandiData[i]["_id"];
+                        //     break;
+                        //   }
+                        // }
+                        // print("selectedmandiid");
+                        // print(selectedmandiId);
                         getMandiProducts(selectMandi);
                       },
-                      items: dropDownMandiData.map(
+                      items: GetAllMandiData.map(
                         (Location) {
                           return DropdownMenuItem(
                             child: Text(Location),
@@ -566,7 +551,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         onChanged: (value) {
-                          print("changed");
+                          print(value);
+                          getFilteredData(value);
                         },
                       ),
                     ),
@@ -584,40 +570,53 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            GetMandiData.length==0
+             selectMandi==null && GetAllMandiData.length>0
                 ? Padding(
-                    padding: const EdgeInsets.only(top: 100.0),
-                    child: Center(
-                      child: Text(
-                        "No Data Found",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  )
+              padding: const EdgeInsets.only(top: 100.0),
+              child: Center(
+                child: Text(
+                  "Please Select Mandi",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            )
+                :  GetMandiData.length==0
+                ? Padding(
+              padding: const EdgeInsets.only(top: 100.0),
+              child: Center(
+                child: Text(
+                  "No Data Found",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            )
                 : Expanded(
                     child: Padding(
                     padding: const EdgeInsets.only(top: 15.0),
                     child: ListView.builder(
                         itemCount: GetMandiData.length,
                         itemBuilder: (context, index) {
+                          print(GetMandiData.length);
                           return InkWell(
                             onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => PriceScreen(
-                                    eachProductId: GetMandiData[index]["_id"],
-                                    index: index,
+                                    GetMandiData: GetMandiData[index],
                                   ),
                                 ),
                               );
                             },
                             child: ProductComponent(
-                              GetAllProductsData: GetMandiData[index]
-                                  ["productId"],
+                              GetAllProductsData: GetMandiData[index],
+                                  // ["productId"],
                             ),
                           );
                         }),

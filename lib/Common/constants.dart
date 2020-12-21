@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-String API_URL = "https://bhav003.herokuapp.com/";
+String API_URL = "http://13.234.119.95/";
 
 Map<int, Color> appColorMap1 = {
   50: Color.fromRGBO(56, 31, 113, .1),

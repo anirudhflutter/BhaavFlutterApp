@@ -8,6 +8,13 @@ class ProductComponent extends StatefulWidget {
 }
 
 class _ProductComponentState extends State<ProductComponent> {
+
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -25,10 +32,10 @@ class _ProductComponentState extends State<ProductComponent> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: SizedBox(
-                  width: 90,
+                  // width: 90,
                   height: 90,
-                  child: Image.asset(
-                      "${widget.GetAllProductsData["productImage"]}"),
+                  // child: Image.asset(
+                  //     "${widget.GetAllProductsData["productImage"]}"),
                 ),
               ),
 
@@ -36,7 +43,7 @@ class _ProductComponentState extends State<ProductComponent> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    "${widget.GetAllProductsData["productName"]}",
+                    "${widget.GetAllProductsData["CropName"]}",
                     style: TextStyle(fontFamily: 'Quick', fontSize: 22),
                   ),
                   Padding(
@@ -58,12 +65,12 @@ class _ProductComponentState extends State<ProductComponent> {
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 3.0),
-                            child: Text(
-                              '${widget.GetAllProductsData["yesterDayPrice"]}₹/Kg',
-                            ),
-                          ),
+                          // Padding(
+                          //   padding: const EdgeInsets.only(top: 3.0),
+                          //   child: Text(
+                          //     "${widget.GetAllProductsData["lowestPrice"]}"+'₹/Kg',
+                          //   ),
+                          // ),
                         ],
                       ),
                       Padding(
@@ -86,29 +93,30 @@ class _ProductComponentState extends State<ProductComponent> {
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 1.0, left: 3),
-                            child: Text(
-                              '${widget.GetAllProductsData["toDayPrice"]}₹/Kg',
-                              style: TextStyle(
-                                  fontFamily: 'Quick',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ),
+                          // Padding(
+                          //   padding: const EdgeInsets.only(top: 1.0, left: 3),
+                          //   child: Text(
+                          //     "${widget.GetAllProductsData["highestPrice"]}"+'₹/Kg',
+                          //     style: TextStyle(
+                          //         fontFamily: 'Quick',
+                          //         fontSize: 15,
+                          //         fontWeight: FontWeight.w600),
+                          //   ),
+                          // ),
                         ],
                       ),
                     ],
                   )
                 ],
               ),
-              widget.GetAllProductsData["yesterDayPrice"] < widget.GetAllProductsData["toDayPrice"] ? Padding(
-                padding: const EdgeInsets.only(right: 15.0),
-                child: Image.asset('assets/images/arrow_up.png'),
-              ):Padding(
-                padding: const EdgeInsets.only(right: 15.0),
-                child: Image.asset('assets/images/arrow_down.png'),
-              ),
+              // widget.GetAllProductsData["lowestPrice"] <
+              //     widget.GetAllProductsData["highestPrice"] ? Padding(
+              //   padding: const EdgeInsets.only(right: 15.0),
+              //   child: Image.asset('assets/images/arrow_up.png'),
+              // ):Padding(
+              //   padding: const EdgeInsets.only(right: 15.0),
+              //   child: Image.asset('assets/images/arrow_down.png'),
+              // ),
               //TODO show up-down key
             ],
           ),

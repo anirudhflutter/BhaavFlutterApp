@@ -47,7 +47,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     GetStates();
-    GetCities();
+    // GetCities();
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
     pr.style(
         message: "Please Wait",
@@ -327,44 +327,44 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  GetCities() async {
-    try {
-      //check Internet Connection
-      final result = await InternetAddress.lookup('google.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        setState(() {
-          isLoading = true;
-        });
-        Services.GetCities().then((data) async {
-          if (data.length > 0) {
-            pr.hide();
-            setState(() {
-              isLoading = false;
-            });
-            for (int i = 0; i < data.length; i++) {
-              GetCityData.add(data[i]["City"]);
-            }
-            for (int i = 0; i < data.length; i++) {
-              GetCityIdData.add(data[i]["_id"]);
-            }
-            print("GetCityData");
-            print(GetCityData);
-          }
-        }, onError: (e) {
-          pr.hide();
-          showMsg("Try Again.");
-        });
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-        pr.hide();
-        showMsg("No Internet Connection.");
-      }
-    } on SocketException catch (_) {
-      showMsg("No Internet Connection.");
-    }
-  }
+  // GetCities() async {
+  //   try {
+  //     //check Internet Connection
+  //     final result = await InternetAddress.lookup('google.com');
+  //     if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+  //       setState(() {
+  //         isLoading = true;
+  //       });
+  //       Services.GetCities().then((data) async {
+  //         if (data.length > 0) {
+  //           pr.hide();
+  //           setState(() {
+  //             isLoading = false;
+  //           });
+  //           for (int i = 0; i < data.length; i++) {
+  //             GetCityData.add(data[i]["City"]);
+  //           }
+  //           for (int i = 0; i < data.length; i++) {
+  //             GetCityIdData.add(data[i]["_id"]);
+  //           }
+  //           print("GetCityData");
+  //           print(GetCityData);
+  //         }
+  //       }, onError: (e) {
+  //         pr.hide();
+  //         showMsg("Try Again.");
+  //       });
+  //     } else {
+  //       setState(() {
+  //         isLoading = false;
+  //       });
+  //       pr.hide();
+  //       showMsg("No Internet Connection.");
+  //     }
+  //   } on SocketException catch (_) {
+  //     showMsg("No Internet Connection.");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -642,49 +642,49 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(
-                    top: 22.0, left: 15, right: 15, bottom: 10),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(
-                        color: COLOR.primaryColor,
-                        style: BorderStyle.solid,
-                        width: 0.80),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 5.0, right: 5),
-                      child: DropdownButton(
-                        dropdownColor: Colors.white,
-                        hint: Text("Select City"),
-                        icon: Icon(
-                          Icons.arrow_drop_down,
-                          size: 40,
-                          color: COLOR.primaryColor,
-                        ),
-                        isExpanded: true,
-                        value: _selectCity,
-                        onChanged: (newvalue) {
-                          SelectedCity = newvalue;
-                          setState(() {
-                            _selectCity = newvalue;
-                          });
-                        },
-                        items: GetCityData.map(
-                              (Location) {
-                            return DropdownMenuItem(
-                              child: Text(Location),
-                              value: Location,
-                            );
-                          },
-                        ).toList(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.only(
+              //       top: 22.0, left: 15, right: 15, bottom: 10),
+              //   child: Container(
+              //     decoration: BoxDecoration(
+              //       borderRadius: BorderRadius.circular(8.0),
+              //       border: Border.all(
+              //           color: COLOR.primaryColor,
+              //           style: BorderStyle.solid,
+              //           width: 0.80),
+              //     ),
+              //     child: DropdownButtonHideUnderline(
+              //       child: Padding(
+              //         padding: const EdgeInsets.only(left: 5.0, right: 5),
+              //         child: DropdownButton(
+              //           dropdownColor: Colors.white,
+              //           hint: Text("Select City"),
+              //           icon: Icon(
+              //             Icons.arrow_drop_down,
+              //             size: 40,
+              //             color: COLOR.primaryColor,
+              //           ),
+              //           isExpanded: true,
+              //           value: _selectCity,
+              //           onChanged: (newvalue) {
+              //             SelectedCity = newvalue;
+              //             setState(() {
+              //               _selectCity = newvalue;
+              //             });
+              //           },
+              //           items: GetCityData.map(
+              //                 (Location) {
+              //               return DropdownMenuItem(
+              //                 child: Text(Location),
+              //                 value: Location,
+              //               );
+              //             },
+              //           ).toList(),
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
               Align(
                 alignment: Alignment.center,
                 child: InkWell(
@@ -694,8 +694,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         edtNameController.text == "" ||
                         edtLocationController.text == "" ||
                         edtLandSizeOwnedController.text == "" ||
-                        _selectState == "" ||
-                        _selectCity == "") {
+                        _selectState == "") {
                       showMsg("Please try again");
                     } else {
                       checkUser();

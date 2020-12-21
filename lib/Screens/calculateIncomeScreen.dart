@@ -1,9 +1,15 @@
 import 'package:bhaav/Common/constants.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:location/location.dart' as loc;
+import 'package:progress_dialog/progress_dialog.dart';
 
 class calculateIncomeScreen extends StatefulWidget {
+  Map individualProductData={};
+  calculateIncomeScreen({this.individualProductData});
   @override
   _calculateIncomeScreenState createState() => _calculateIncomeScreenState();
 }
@@ -14,6 +20,7 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
   DateTime _date = DateTime.now();
   DateTimePickerLocale _locale = DateTimePickerLocale.en_us;
   TextEditingController date = TextEditingController();
+  TextEditingController edtQuantityController = TextEditingController();
 
   void _showBirthDate() {
     DatePicker.showDatePicker(
@@ -37,8 +44,74 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
     );
   }
 
+  ProgressDialog pr;
+
+  @override
+  void initState() {
+    getUserLocation();
+    pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
+    pr.style(
+        message: "Please Wait",
+        borderRadius: 10.0,
+        progressWidget: Container(
+          padding: EdgeInsets.all(15),
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(appPrimaryMaterialColor),
+          ),
+        ),
+        elevation: 10.0,
+        insetAnimCurve: Curves.easeInOut,
+        messageTextStyle: TextStyle(
+            color: Colors.black, fontSize: 17.0, fontWeight: FontWeight.w600));
+    // TODO: implement initState
+    super.initState();
+  }
+  loc.LocationData currentLocation;
+  String address = "";
+  double Lat = 0.0, Long = 0.0;
+  String myaddress ="";
+
+  getUserLocation() async {
+    loc.LocationData myLocation;
+    String error;
+    loc.Location location = new loc.Location();
+    try {
+      myLocation = await location.getLocation();
+    } on PlatformException catch (e) {
+      if (e.code == 'PERMISSION_DENIED') {
+        error = 'please grant permission';
+        print(error);
+      }
+      if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
+        error = 'permission denied- please enable it from app settings';
+        print(error);
+      }
+      myLocation = null;
+    }
+    currentLocation = myLocation;
+    Lat = currentLocation.latitude;
+    Long = currentLocation.longitude;
+    print("lat");
+    print(Lat);
+    print("Long");
+    print(Long);
+    final coordinates =
+    new Coordinates(myLocation.latitude, myLocation.longitude);
+    var addresses =
+    await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var first = addresses.first;
+    setState(() {
+      myaddress ='${first.addressLine}';
+    });
+    print(
+        '${first.addressLine}, ${first.featureName},${first.thoroughfare}');
+    return first;
+  }
+
+  int totalCost=0;
   @override
   Widget build(BuildContext context) {
+    print(totalCost);
     return Scaffold(
       appBar: AppBar(
         brightness: Brightness.dark,
@@ -115,7 +188,7 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                             decoration: InputDecoration(
                               hintText: "Enter Product Name",
                               isDense: true,
-                              labelText: "Product",
+                              labelText: "${widget.individualProductData["productId"]["productName"]}",
                               //BaseLang.getFullName(),
                               labelStyle: TextStyle(
                                   fontFamily: "Quick",
@@ -138,7 +211,9 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                         Padding(
                           padding: const EdgeInsets.only(
                               left: 17.0, right: 17, top: 15),
-                          child: TextField(
+                          child: TextFormField(
+                            controller: edtQuantityController,
+                            keyboardType: TextInputType.number,
                             decoration: InputDecoration(
                               hintText: "Enter Quantity",
                               isDense: true,
@@ -173,6 +248,13 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                                 borderSide: BorderSide(color: Colors.grey),
                               ),
                             ),
+                            onFieldSubmitted: (value){
+                              setState(() {
+                                totalCost =
+                                    widget.individualProductData["productId"]["toDayPrice"]
+                                        *int.parse(value);
+                              });
+                            },
                           ),
                         ),
                         Padding(
@@ -211,31 +293,19 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                                   ],
                                 ),
                               ),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 8.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 9.0, top: 30),
-                                        child: Text(
-                                          'My Location,Lorem,ipsum sorem \nStreet No -1,\nAhemedabad,395412',
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 9.0, top: 35),
-                                        child: Text(
-                                          'Sardar Market \nSardar Market near Khand Bazar,\nMaharashtra',
-                                        ),
-                                      )
-                                    ],
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    myaddress.toString(),
                                   ),
-                                ),
+                                  SizedBox(
+                                    height: MediaQuery.of(context).padding.top + 30,                                  ),
+                                  Text(
+                                      "${widget.individualProductData["mandiId"]["location"]["completeAddress"]}",
+                                      ),
+                                ],
                               ),
                             ],
                           ),
@@ -264,7 +334,7 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                                     ),
                                     child: Center(
                                       child: Text(
-                                        "5220",
+                                        "${totalCost}",
                                         style: TextStyle(
                                             fontSize: 17,
                                             fontWeight: FontWeight.w600),
@@ -378,7 +448,7 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                             decoration: InputDecoration(
                               hintText: "Enter Product Name",
                               isDense: true,
-                              labelText: "Product",
+                              labelText: "${widget.individualProductData["productId"]["productName"]}",
                               //BaseLang.getFullName(),
                               labelStyle: TextStyle(
                                   fontFamily: "Quick",
@@ -402,7 +472,8 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                         Padding(
                           padding: const EdgeInsets.only(
                               left: 17.0, right: 17, top: 15),
-                          child: TextField(
+                          child: TextFormField(
+                            keyboardType: TextInputType.number,
                             decoration: InputDecoration(
                               hintText: "Enter Quantity",
                               isDense: true,
@@ -437,6 +508,13 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                                 borderSide: BorderSide(color: Colors.grey),
                               ),
                             ),
+                            onFieldSubmitted: (value){
+                              setState(() {
+                                totalCost =
+                                    widget.individualProductData["productId"]["toDayPrice"]
+                                        *int.parse(value);
+                              });
+                            },
                           ),
                         ),
                         Padding(
@@ -576,24 +654,17 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                                 child: Padding(
                                   padding: const EdgeInsets.only(right: 8.0),
                                   child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 15.0, top: 20),
-                                        child: Text(
-                                          'My Location,Lorem,ipsum sorem \nStreet No -1,\nAhemedabad,395412',
-                                        ),
+                                      Text(
+                                        myaddress.toString(),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 15.0, top: 35),
-                                        child: Text(
-                                          'Sardar Market \nSardar Market near Khand Bazar,\nMaharashtra',
-                                        ),
-                                      )
+                                      SizedBox(
+                                        height: MediaQuery.of(context).padding.top + 30,                                  ),
+                                      Text(
+                                        "${widget.individualProductData["mandiId"]["location"]["completeAddress"]}",
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -625,7 +696,7 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                                     ),
                                     child: Center(
                                       child: Text(
-                                        "5220",
+                                        "${totalCost}",
                                         style: TextStyle(
                                             fontSize: 17,
                                             fontWeight: FontWeight.w600),

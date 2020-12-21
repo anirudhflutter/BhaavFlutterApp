@@ -13,16 +13,15 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
 class PriceScreen extends StatefulWidget {
-  String eachProductId = "";
-  int index = 0;
-  PriceScreen({this.eachProductId, this.index});
+  Map GetMandiData;
+  PriceScreen({this.GetMandiData});
   @override
   _PriceScreenState createState() => _PriceScreenState();
 }
 
 class _PriceScreenState extends State<PriceScreen> {
   String _selectState;
-  String _selectCity;
+  // String _selectCity;
 
   ProgressDialog pr;
   bool isLoading = false;
@@ -58,13 +57,16 @@ class _PriceScreenState extends State<PriceScreen> {
       //check Internet Connection
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        pr.show();
         setState(() {
           isLoading = true;
         });
+        print("productid");
         var data = {
-          "productId": "5fd72eb08de495584afb27c4",
+          "productId": widget.GetMandiData["productId"]["_id"],
         };
         Services.getProductDetails(data).then((data) async {
+          pr.hide();
           if (data.Data.length > 0) {
             setState(() {
               isLoading = false;
@@ -73,7 +75,7 @@ class _PriceScreenState extends State<PriceScreen> {
             print("getProductDetailsData");
             print(getProductDetailsData);
           } else {
-            showMsg("${data.Message}");
+            // showMsg("${data.Message}");
           }
         }, onError: (e) {
           showMsg("Try Again.");
@@ -92,10 +94,8 @@ class _PriceScreenState extends State<PriceScreen> {
 
   @override
   void initState() {
-    print("tapped product id");
-    print(widget.eachProductId);
-    getProductDetails();
-    GetStates();
+    // getProductDetails();
+    // GetStates();
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
     pr.style(
         message: "Please Wait",
@@ -153,35 +153,48 @@ class _PriceScreenState extends State<PriceScreen> {
     }
   }
 
-  GetCities(String selectedStateId) async {
+  getMandiWiseCrop(String selectedStateId) async {
     try {
       print("selectedStateId");
       print(selectedStateId);
       //check Internet Connection
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        pr.show();
         setState(() {
           isLoading = true;
         });
-        Services.GetCities().then((data) async {
+        print("MandiId");
+        print(widget.GetMandiData["MandiId"]);
+        var data = {
+          "stateId" : selectedStateId.toString(),
+          "mandiId" : widget.GetMandiData["MandiId"].toString()
+        };
+        Services.getMandiWiseCrop(data).then((data) async {
           if (data.length > 0) {
             pr.hide();
             setState(() {
               isLoading = false;
-              GetDataForCities = data;
+              getProductDetailsData = data;
             });
-            print("GetDataForCities");
-            print(GetDataForCities);
-            for (int i = 0; i < GetDataForCities.length; i++) {
-              if(selectedStateId==GetDataForCities[i]["State"]["_id"].toString()){
-                print("found");
-                if(!CitiesDropDown.contains(GetDataForCities[i]["City"])) {
-                  CitiesDropDown.add(GetDataForCities[i]["City"]);
-                }
-              }
-            }
-            print("CitiesDropDown");
-            print(CitiesDropDown);
+            print("getProductDetailsData");
+            print(getProductDetailsData);
+            // for (int i = 0; i < GetDataForCities.length; i++) {
+            //   if(selectedStateId==GetDataForCities[i]["State"]["_id"].toString()){
+            //     print("found");
+            //     if(!CitiesDropDown.contains(GetDataForCities[i]["City"])) {
+            //       CitiesDropDown.add(GetDataForCities[i]["City"]);
+            //     }
+            //   }
+            // }
+          }
+          else{
+            setState(() {
+              getProductDetailsData.clear();
+            });
+            pr.hide();
+            print("No data found");
+            // showMsg("No Data Found");
           }
         }, onError: (e) {
           pr.hide();
@@ -228,9 +241,7 @@ class _PriceScreenState extends State<PriceScreen> {
           ),
         ),
       ),
-      body: getProductDetailsData.length == 0
-          ? Center(child: CircularProgressIndicator())
-          : Column(
+      body: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -238,17 +249,22 @@ class _PriceScreenState extends State<PriceScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 15.0, top: 12),
-                        child: Image.asset(
-                          "${getProductDetailsData[widget.index]["productId"]["productImage"]}",
-                          height: 110,
-                          width: 110,
+                        padding: const EdgeInsets.only(left: 25.0, top: 12),
+                        // child: Image.asset(
+                        //   "${getProductDetailsData["productId"]["productImage"]}",
+                        //   height: 110,
+                        //   width: 110,
+                        // ),
+                        child: Image.network("https://4.imimg.com/data4/RT/YF/ANDROID-35463146/product-500x500.jpeg",
+                        fit: BoxFit.contain,
+                          height: MediaQuery.of(context).size.height*0.2,
+                          width: MediaQuery.of(context).size.width*0.3,
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 35.0),
                         child: Text(
-                          "${getProductDetailsData[widget.index]["productId"]["productName"]}",
+                          "${widget.GetMandiData["CropName"]}",
                           style: TextStyle(
                               fontSize: 22,
                               fontFamily: 'Quick',
@@ -273,27 +289,26 @@ class _PriceScreenState extends State<PriceScreen> {
                           padding: const EdgeInsets.only(left: 5.0, right: 5),
                           child: DropdownButton(
                             dropdownColor: Colors.white,
-                            hint: Text("Select State"),
+                            // hint: Text("Select State"),
                             icon: Icon(
                               Icons.arrow_drop_down,
                               size: 40,
                               color: COLOR.primaryColor,
                             ),
                             isExpanded: true,
-                            value: _selectState,
+                            value: "Maharashtra",
                             onChanged: (newvalue) {
-                              CitiesDropDown.clear();
-                              for(int i=0;i<GetDataForStates.length;i++){
-                                if(newvalue==GetDataForStates[i]["State"]){
-                                  GetCities(GetDataForStates[i]["_id"]);
-                                  print('GetDataForStates[i]["_id"]');
-                                  print(GetDataForStates[i]["_id"]);
-                                  break;
-                                }
-                              }
-                              setState(() {
-                                _selectState = newvalue;
-                              });
+                              // for(int i=0;i<GetDataForStates.length;i++){
+                              //   if(newvalue==GetDataForStates[i]["State"]){
+                              //     getMandiWiseCrop(GetDataForStates[i]["_id"]);
+                              //     print('GetDataForStates[i]["_id"]');
+                              //     print(GetDataForStates[i]["_id"]);
+                              //     break;
+                              //   }
+                              // }
+                              // setState(() {
+                              //   _selectState = newvalue;
+                              // });
                             },
                             items: StatesDropDown.map(
                               (Location) {
@@ -308,48 +323,48 @@ class _PriceScreenState extends State<PriceScreen> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        top: 22.0, left: 15, right: 15, bottom: 10),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        border: Border.all(
-                            color: COLOR.primaryColor,
-                            style: BorderStyle.solid,
-                            width: 0.80),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 5.0, right: 5),
-                          child: DropdownButton(
-                            dropdownColor: Colors.white,
-                            hint: Text("Select City"),
-                            icon: Icon(
-                              Icons.arrow_drop_down,
-                              size: 40,
-                              color: COLOR.primaryColor,
-                            ),
-                            isExpanded: true,
-                            value: _selectCity,
-                            onChanged: (newvalue) {
-                              setState(() {
-                                _selectCity = newvalue;
-                              });
-                            },
-                            items: CitiesDropDown.map(
-                              (Location) {
-                                return DropdownMenuItem(
-                                  child: Text(Location),
-                                  value: Location,
-                                );
-                              },
-                            ).toList(),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(
+                  //       top: 22.0, left: 15, right: 15, bottom: 10),
+                  //   child: Container(
+                  //     decoration: BoxDecoration(
+                  //       borderRadius: BorderRadius.circular(8.0),
+                  //       border: Border.all(
+                  //           color: COLOR.primaryColor,
+                  //           style: BorderStyle.solid,
+                  //           width: 0.80),
+                  //     ),
+                  //     child: DropdownButtonHideUnderline(
+                  //       child: Padding(
+                  //         padding: const EdgeInsets.only(left: 5.0, right: 5),
+                  //         child: DropdownButton(
+                  //           dropdownColor: Colors.white,
+                  //           hint: Text("Select City"),
+                  //           icon: Icon(
+                  //             Icons.arrow_drop_down,
+                  //             size: 40,
+                  //             color: COLOR.primaryColor,
+                  //           ),
+                  //           isExpanded: true,
+                  //           value: _selectCity,
+                  //           onChanged: (newvalue) {
+                  //             setState(() {
+                  //               _selectCity = newvalue;
+                  //             });
+                  //           },
+                  //           items: CitiesDropDown.map(
+                  //             (Location) {
+                  //               return DropdownMenuItem(
+                  //                 child: Text(Location),
+                  //                 value: Location,
+                  //               );
+                  //             },
+                  //           ).toList(),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   Padding(
                     padding: const EdgeInsets.only(top: 12.0),
                     child: Row(
@@ -368,13 +383,25 @@ class _PriceScreenState extends State<PriceScreen> {
                       ],
                     ),
                   ),
-                  Expanded(
+                getProductDetailsData.length==0 ?
+                Column(
+                  children: [
+                    SizedBox(
+                      height: 200,
+                    ),
+                    Center(
+                      child: Text("No Data Found"),
+                    ),
+                  ],
+
+                ):
+                Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(top: 9.0),
                       child: ListView.separated(
                           physics: BouncingScrollPhysics(),
                           // scrollDirection: Axis.horizontal,
-                          itemCount: 10,
+                          itemCount: getProductDetailsData.length,
                           separatorBuilder: (BuildContext context, int index) =>
                               Divider(
                                 thickness: 1,
@@ -387,7 +414,7 @@ class _PriceScreenState extends State<PriceScreen> {
                                   MaterialPageRoute(
                                     builder: (context) => PriceDetailScreen(
                                       individualProductData:
-                                          getProductDetailsData[widget.index],
+                                          getProductDetailsData[index],
                                     ),
                                   ),
                                 );
@@ -400,17 +427,17 @@ class _PriceScreenState extends State<PriceScreen> {
                                     width:
                                         MediaQuery.of(context).size.width / 3,
                                     child: Text(
-                                      "${getProductDetailsData[widget.index]["mandiId"]["MandiName"]}",
+                                      "${getProductDetailsData[index]["mandiId"]["MandiName"]}",
                                     ),
                                   ),
                                   Column(
                                     children: [
                                       Text(
-                                        "${getProductDetailsData[widget.index]["productId"]["yesterDayPrice"]}" +
+                                        "${getProductDetailsData[index]["productId"]["yesterDayPrice"]}" +
                                             ".00",
                                       ),
                                       Text(
-                                        "${getProductDetailsData[widget.index]["productId"]["toDayPrice"]}" +
+                                        "${getProductDetailsData[index]["productId"]["toDayPrice"]}" +
                                             ".00",
                                       ),
                                     ],
@@ -418,11 +445,11 @@ class _PriceScreenState extends State<PriceScreen> {
                                   Column(
                                     children: [
                                       Text(
-                                        "${getProductDetailsData[widget.index]["productId"]["priceChangeIndicator"]}" +
+                                        "${getProductDetailsData[index]["productId"]["priceChangeIndicator"]}" +
                                             ".00",
                                       ),
                                       Text(
-                                        "${getProductDetailsData[widget.index]["productId"]["toDayPrice"]}",
+                                        "${getProductDetailsData[index]["productId"]["toDayPrice"]}",
                                       ),
                                     ],
                                   ),

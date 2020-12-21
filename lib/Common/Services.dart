@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import '../Common/constants.dart' as cnst;
 import 'ClassList.dart';
+import 'package:http/http.dart' as http;
 
 Dio dio = new Dio();
 
@@ -58,11 +59,36 @@ class Services {
     }
   }
 
-  static Future<List> getNearMandi(body) async {
-    String url = cnst.API_URL + 'api/mandi/getNearMandi';
+  static Future<List> getMlData() async {
+    String url = 'http://192.168.29.54:5000/getuserselectedmandi?MandiName=Aatpadi';
+    print("getMlData url : " + url);
+    try {
+      final response = await dio.get(url);
+      if (response.statusCode == 200) {
+        List list =[];
+        var memberDataClass = response.data;
+        if (memberDataClass["data"] != 0) {
+          print(memberDataClass["data"]);
+          list = memberDataClass["data"];
+        } else {
+          list = [];
+        }
+        return list;
+      } else {
+        throw Exception(response.data.toString());
+      }
+    } catch (e) {
+      print("getMlData Error ${e.toString()}");
+      throw Exception(e.toString());
+    }
+  }
+
+
+  static Future<List> getAllMandi() async {
+    String url = "http://192.168.29.54:5000/getAllMandi";
     print("getNearMandi url : " + url);
     try {
-      final response = await dio.post(url,data: body);
+      final response = await dio.get(url);
       if (response.statusCode == 200) {
         List list =[];
         var memberDataClass = response.data;
@@ -82,24 +108,27 @@ class Services {
     }
   }
 
-  static Future<List> getMandiProducts(body) async {
-    String url = cnst.API_URL + 'api/product/getMandiProducts';
+  static Future<List> getMandiProducts(String mandiname) async {
+    // http://15.206.79.244/getuserselectedmandi?MandiName=Aatpadi
+    String url = "http://192.168.29.54:5000/" + "getuserselectedmandi?MandiName=$mandiname";
     print("getMandiProducts url : " + url);
     try {
-      final response = await dio.post(url,data: body);
+      final response = await dio.get(url);
       List list = [];
-      if (response.statusCode == 200) {
+      // if (response.statusCode == 200) {
+        print("response.data");
+        print(response.data);
         var memberDataClass = response.data;
-        if (memberDataClass["Data"] != 0) {
-          print(memberDataClass["Data"]);
-          list = memberDataClass["Data"];
+        if (memberDataClass["data"] != 0) {
+          print(memberDataClass["data"]);
+          list = memberDataClass["data"];
         } else {
           list = [];
         }
         return list;
-      } else {
-        throw Exception(response.data.toString());
-      }
+      // } else {
+      //   throw Exception(response.data.toString());
+      // }
     } catch (e) {
       print("getMandiProducts Error ${e.toString()}");
       throw Exception(e.toString());
@@ -155,11 +184,11 @@ class Services {
     }
   }
 
-  static Future<List> GetCities() async {
-    String url = cnst.API_URL + 'api/admin/getCity';
-    print("GetCities url : " + url);
+  static Future<List> getMandiWiseCrop(body) async {
+    String url = cnst.API_URL + 'api/admin/getMandiWiseCrop';
+    print("getMandiWiseCrop url : " + url);
     try {
-      final response = await dio.post(url);
+      final response = await dio.post(url,data: body);
       List list = [];
       if (response.statusCode == 200) {
         var memberDataClass = response.data;
@@ -174,7 +203,7 @@ class Services {
         throw Exception(response.data.toString());
       }
     } catch (e) {
-      print("GetCities Error ${e.toString()}");
+      print("getMandiWiseCrop Error ${e.toString()}");
       throw Exception(e.toString());
     }
   }

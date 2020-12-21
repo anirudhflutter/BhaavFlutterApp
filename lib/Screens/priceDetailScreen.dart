@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bhaav/Common/Services.dart';
 import 'package:bhaav/Common/constants.dart';
 import 'package:bhaav/Common/langString.dart';
+import 'package:bhaav/Screens/calculateIncomeScreen.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -63,7 +64,7 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                     Padding(
                       padding: const EdgeInsets.only(left: 20.0, top: 12),
                       child: Image.asset(
-                        'assets/images/onion.jpg',
+                        "${widget.individualProductData["productId"]["productImage"]}",
                         height: 110,
                         width: 110,
                       ),
@@ -87,7 +88,7 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                     decoration: InputDecoration(
                       hintText: "Enter Mandi Name",
                       isDense: true,
-                      labelText: "Mandi Name",
+                      labelText: "${widget.individualProductData["mandiId"]["MandiName"]}",
                       //BaseLang.getFullName(),
                       labelStyle: TextStyle(
                           fontFamily: "Quick", color: COLOR.primaryColor),
@@ -160,7 +161,7 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                               ),
                             ),
                             Text(
-                              "15.00",
+                                "${widget.individualProductData["productId"]["yesterDayPrice"]}",
                               style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.w600,
@@ -209,7 +210,7 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                               ),
                             ),
                             Text(
-                              "20.00",
+                              "${widget.individualProductData["productId"]["toDayPrice"]}",
                               style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.w600,
@@ -351,8 +352,14 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                     padding: const EdgeInsets.only(bottom: 20.0),
                     child: GestureDetector(
                       onTap: () {
-                        Navigator.of(context)
-                            .pushNamed('/calculateIncomeScreen');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => calculateIncomeScreen(
+                                individualProductData:widget.individualProductData,
+                            ),
+                          ),
+                        );
                       },
                       child: Container(
                         height: 40,
