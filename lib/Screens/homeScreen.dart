@@ -180,7 +180,6 @@ class _HomeScreenState extends State<HomeScreen> {
               isLoading = false;
             });
           } else {
-            // showMsg(data["Message"]);
           }
         }, onError: (e) {
           showMsg("Try Again.");
