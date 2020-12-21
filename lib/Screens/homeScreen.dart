@@ -205,9 +205,6 @@ class _HomeScreenState extends State<HomeScreen> {
           isLoading = true;
         });
         print(selectMandi);
-        // var data = {
-        //   "mandiId": selectedMandi, // pass selectedmandiId
-        // };
         GetMandiData.clear();
         Services.getMandiProducts(selectedMandi).then((data) async {
           pr.hide();
