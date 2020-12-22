@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     getAllMandi();
     GetLocalData();
-    getUserLocation();
+    // getUserLocation();
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
     pr.style(
         message: "Please Wait",
@@ -261,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Padding(
                     padding: const EdgeInsets.only(left: 10.0, top: 50),
                     child: Container(
-                      height: 73,
+                      height: 72,
                       width: 73,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,

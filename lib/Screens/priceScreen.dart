@@ -94,8 +94,6 @@ class _PriceScreenState extends State<PriceScreen> {
 
   @override
   void initState() {
-    // getProductDetails();
-    // GetStates();
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
     pr.style(
         message: "Please Wait",

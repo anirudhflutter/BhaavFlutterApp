@@ -85,10 +85,12 @@ class Services {
 
 
   static Future<List> getAllMandi() async {
-    String url = "http://192.168.29.54:5000/getAllMandi";
-    print("getNearMandi url : " + url);
+    String url = cnst.python_url + "getAllMandis";
+    print("getAllMandis url : " + url);
     try {
       final response = await dio.get(url);
+      print("response");
+      print(response.statusCode);
       if (response.statusCode == 200) {
         List list =[];
         var memberDataClass = response.data;
@@ -103,7 +105,7 @@ class Services {
         throw Exception(response.data.toString());
       }
     } catch (e) {
-      print("getNearMandi Error ${e.toString()}");
+      print("getAllMandis Error ${e.toString()}");
       throw Exception(e.toString());
     }
   }

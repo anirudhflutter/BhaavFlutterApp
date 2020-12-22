@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 String API_URL = "http://13.234.119.95/";
+String python_url = "http://192.168.29.54:5000/";
 
 Map<int, Color> appColorMap1 = {
   50: Color.fromRGBO(56, 31, 113, .1),

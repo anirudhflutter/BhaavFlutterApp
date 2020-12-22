@@ -9,7 +9,6 @@ class ProductComponent extends StatefulWidget {
 
 class _ProductComponentState extends State<ProductComponent> {
 
-
   @override
   void initState() {
     super.initState();
@@ -109,14 +108,14 @@ class _ProductComponentState extends State<ProductComponent> {
                   )
                 ],
               ),
-              // widget.GetAllProductsData["lowestPrice"] <
-              //     widget.GetAllProductsData["highestPrice"] ? Padding(
-              //   padding: const EdgeInsets.only(right: 15.0),
-              //   child: Image.asset('assets/images/arrow_up.png'),
-              // ):Padding(
-              //   padding: const EdgeInsets.only(right: 15.0),
-              //   child: Image.asset('assets/images/arrow_down.png'),
-              // ),
+              widget.GetAllProductsData["lowestPrice"] <
+                  widget.GetAllProductsData["highestPrice"] ? Padding(
+                padding: const EdgeInsets.only(right: 15.0),
+                child: Image.asset('assets/images/arrow_up.png'),
+              ):Padding(
+                padding: const EdgeInsets.only(right: 15.0),
+                child: Image.asset('assets/images/arrow_down.png'),
+              ),
               //TODO show up-down key
             ],
           ),
