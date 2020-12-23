@@ -325,7 +325,7 @@ class MarathiLang {
   static String fullName = "पूर्ण नाव";
   static String location = "स्थान";
   static String landSizeOwned = "जमीन आकार मालकीचा:";
-  static String bigha = "बिघा";
+  static String bigha = "एकर";
   static String state = "राज्य";
   static String district = "जिल्हा";
   static String submit = "प्रस्तुत करणे";
@@ -384,7 +384,7 @@ class EnglishLang {
   static String fullName = "Full Name";
   static String location = "Location";
   static String landSizeOwned = "Land Size Owned:";
-  static String bigha = "Bigha";
+  static String bigha = "Acre";
   static String state = "State";
   static String district = "District";
   static String submit = "Submit";

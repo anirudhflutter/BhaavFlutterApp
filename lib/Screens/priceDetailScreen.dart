@@ -1,5 +1,6 @@
 import 'dart:io';
-
+import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:flutter/foundation.dart';
 import 'package:bhaav/Common/Services.dart';
 import 'package:bhaav/Common/constants.dart';
 import 'package:bhaav/Common/langString.dart';
@@ -12,9 +13,13 @@ import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import '../MlDataGraphChart.dart';
+
 class PriceDetailScreen extends StatefulWidget {
   Map individualProductData;
-  PriceDetailScreen({this.individualProductData});
+  String Image = "", cropName = "";
+
+  PriceDetailScreen({this.individualProductData, this.Image, this.cropName});
 
   @override
   _PriceDetailScreenState createState() => _PriceDetailScreenState();
@@ -22,6 +27,127 @@ class PriceDetailScreen extends StatefulWidget {
 
 class _PriceDetailScreenState extends State<PriceDetailScreen> {
   String selectedDate;
+
+  List GetData = [];
+
+  @override
+  void initState() {
+    print(widget.cropName);
+    getMlData(
+        widget.individualProductData["mandiId"]["MandiName"], widget.cropName);
+    super.initState();
+  }
+
+  bool found = false;
+
+  getMlData(String mandiname, String cropName) async {
+    try {
+      //check Internet Connection
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        Services.getMlData(mandiname).then((data) async {
+          if (data.length > 0) {
+            print(data.length);
+            for (int i = 0; i < data.length; i++) {
+              print("cropName");
+              print(cropName);
+              print("data cropname");
+              print(data[i]["CropName"]);
+              if (data[i]["CropName"] == cropName) {
+                found = true;
+                GetData.add(data[i]["Data"]);
+              }
+            }
+            if (found == true) {
+              GetDataIndexWise();
+            }
+            setState(() {
+              found = false;
+            });
+          } else {
+            // showMsg(data["Message"]);
+          }
+        }, onError: (e) {
+          // showMsg("Try Again.");
+        });
+      } else {
+        // showMsg("No Internet Connection.");
+      }
+    } on SocketException catch (_) {
+      // showMsg("No Internet Connection.");
+    }
+  }
+
+  List<FarmersMlDataGraph> data1 = [];
+  List<FarmersMlDataGraph> data2 = [];
+
+  DataForMlGraph() {
+    print(GetData[0].length);
+    print(GetData);
+    for (int i = 0; i < GetData[0].length; i++) {
+      data1.add(
+        FarmersMlDataGraph(
+          Date: GetData[0][i]["Date"].toString(),
+          LowerPrice: GetData[0][i]["Lower Modal Price"].toString(),
+          barColor: charts.ColorUtil.fromDartColor(Colors.redAccent),
+        ),
+      );
+      data2.add(
+        FarmersMlDataGraph(
+          Date: GetData[0][i]["Date"].toString(),
+          UpperPrice: GetData[0][i]["Upper Model Price"].toString(),
+          barColor: charts.ColorUtil.fromDartColor(Colors.green),
+        ),
+      );
+      i+=5;
+    }
+  }
+
+  List<DataRow> GetDataCopy = [];
+  double lowerprice, upperprice;
+  String date = "";
+  List allDates = [];
+
+  Widget GetDataIndexWise() {
+    for (int i = 0; i < GetData[0].length; i++) {
+      lowerprice =
+          double.parse(GetData[0][i]["Lower Modal Price"]).roundToDouble();
+      upperprice =
+          double.parse(GetData[0][i]["Upper Model Price"]).roundToDouble();
+      date = GetData[0][i]["Date"].toString().split("-")[2] +
+          "-" +
+          GetData[0][i]["Date"].toString().split("-")[1] +
+          "-" +
+          GetData[0][i]["Date"].toString().split("-")[0];
+      allDates.add(date);
+      DataForMlGraph();
+      GetDataCopy.add(
+        DataRow(
+          cells: <DataCell>[
+            DataCell(
+              Text(
+                date,
+                style: TextStyle(
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            DataCell(
+              Text(
+                "${lowerprice}" + " Rs",
+              ),
+            ),
+            DataCell(
+              Text(
+                "${upperprice}" + " Rs",
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +188,11 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 20.0, top: 12),
-                      child: Image.asset(
-                        "${widget.individualProductData["productId"]["productImage"]}",
-                        height: 110,
-                        width: 110,
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.network(
+                        "${widget.Image}",
+                        height: 150,
+                        width: 150,
                       ),
                     ),
                     Padding(
@@ -88,7 +214,8 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                     decoration: InputDecoration(
                       hintText: "Enter Mandi Name",
                       isDense: true,
-                      labelText: "${widget.individualProductData["mandiId"]["MandiName"]}",
+                      labelText:
+                          "${widget.individualProductData["mandiId"]["MandiName"]}",
                       //BaseLang.getFullName(),
                       labelStyle: TextStyle(
                           fontFamily: "Quick", color: COLOR.primaryColor),
@@ -127,7 +254,7 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                     child: Row(
                       children: [
                         Text(
-                          "This Month's Price",
+                          "Pricing (Past/Future)",
                           style: TextStyle(
                               fontSize: 15,
                               color: COLOR.primaryColor,
@@ -143,117 +270,182 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                     ),
                   ),
                 ),
+                // Padding(
+                //   padding: const EdgeInsets.only(top: 20.0),
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //     children: [
+                //       Container(
+                //         child: Column(
+                //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //           children: [
+                //             Text(
+                //               "Lowest",
+                //               style: TextStyle(
+                //                 color: Colors.red,
+                //                 fontWeight: FontWeight.w600,
+                //                 fontSize: 18,
+                //               ),
+                //             ),
+                //             Text(
+                //                 "${widget.individualProductData["productId"]["yesterDayPrice"]}",
+                //               style: TextStyle(
+                //                 color: Colors.black,
+                //                 fontWeight: FontWeight.w600,
+                //                 fontSize: 16,
+                //               ),
+                //             ),
+                //             Padding(
+                //               padding: const EdgeInsets.only(top: 5.0),
+                //               child: Text(
+                //                 "15-Oct-2020",
+                //                 style: TextStyle(
+                //                   color: Colors.grey,
+                //                   fontSize: 14,
+                //                 ),
+                //               ),
+                //             ),
+                //           ],
+                //         ),
+                //         width: 110,
+                //         height: 110,
+                //         margin: EdgeInsets.only(right: 5, left: 5),
+                //         decoration: BoxDecoration(
+                //             color: Colors.white,
+                //             border:
+                //                 Border.all(color: Colors.grey[300], width: 1),
+                //             borderRadius:
+                //                 BorderRadius.all(Radius.circular(16.0)),
+                //             boxShadow: [
+                //               BoxShadow(
+                //                   color: Colors.grey.withOpacity(0.2),
+                //                   blurRadius: 2.0,
+                //                   spreadRadius: 2.0,
+                //                   offset: Offset(4.0, 5.0))
+                //             ]),
+                //       ),
+                //       Container(
+                //         child: Column(
+                //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //           children: [
+                //             Text(
+                //               "Highest",
+                //               style: TextStyle(
+                //                 color: Colors.green,
+                //                 fontWeight: FontWeight.w600,
+                //                 fontSize: 18,
+                //               ),
+                //             ),
+                //             Text(
+                //               "${widget.individualProductData["productId"]["toDayPrice"]}",
+                //               style: TextStyle(
+                //                 color: Colors.black,
+                //                 fontWeight: FontWeight.w600,
+                //                 fontSize: 16,
+                //               ),
+                //             ),
+                //             Padding(
+                //               padding: const EdgeInsets.only(top: 5.0),
+                //               child: Text(
+                //                 "17-Oct-2020",
+                //                 style: TextStyle(
+                //                   color: Colors.grey,
+                //                   fontSize: 14,
+                //                 ),
+                //               ),
+                //             ),
+                //           ],
+                //         ),
+                //         width: 110,
+                //         height: 110,
+                //         margin: EdgeInsets.only(right: 5, left: 5),
+                //         decoration: BoxDecoration(
+                //             color: Colors.white,
+                //             border:
+                //                 Border.all(color: Colors.grey[300], width: 1),
+                //             borderRadius:
+                //                 BorderRadius.all(Radius.circular(16.0)),
+                //             boxShadow: [
+                //               BoxShadow(
+                //                   color: Colors.grey.withOpacity(0.2),
+                //                   blurRadius: 2.0,
+                //                   spreadRadius: 2.0,
+                //                   offset: Offset(4.0, 5.0))
+                //             ]),
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Container(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text(
-                              "Lowest",
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 18,
-                              ),
-                            ),
-                            Text(
-                                "${widget.individualProductData["productId"]["yesterDayPrice"]}",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 5.0),
-                              child: Text(
-                                "15-Oct-2020",
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        width: 110,
-                        height: 110,
-                        margin: EdgeInsets.only(right: 5, left: 5),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            border:
-                                Border.all(color: Colors.grey[300], width: 1),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(16.0)),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
-                                  blurRadius: 2.0,
-                                  spreadRadius: 2.0,
-                                  offset: Offset(4.0, 5.0))
-                            ]),
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 1,
                       ),
-                      Container(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text(
-                              "Highest",
-                              style: TextStyle(
-                                color: Colors.green,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 18,
+                    ),
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height * 0.3,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: GetDataCopy.length == 0
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 50.0),
+                                child: CircularProgressIndicator(),
                               ),
-                            ),
-                            Text(
-                              "${widget.individualProductData["productId"]["toDayPrice"]}",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 5.0),
-                              child: Text(
-                                "17-Oct-2020",
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 14,
+                            )
+                          : GetDataCopy.length == 0 && found == false
+                              ? Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 50.0),
+                                    child: Text("No Data Found"),
+                                  ),
+                                )
+                              : DataTable(
+                                  columns: const <DataColumn>[
+                                    DataColumn(
+                                      label: Text(
+                                        'Date',
+                                        style: TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: 14,
+                                          color: Colors.deepOrange,
+                                        ),
+                                      ),
+                                    ),
+                                    DataColumn(
+                                      label: Text(
+                                        'Lowest\nPrice\n(Quintal)',
+                                        style: TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: 14,
+                                          color: Colors.deepOrange,
+                                        ),
+                                      ),
+                                    ),
+                                    DataColumn(
+                                      label: Text(
+                                        'Highest\nPrice\n(Quintal)',
+                                        style: TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: 14,
+                                          color: Colors.deepOrange,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                  rows: GetDataCopy,
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        width: 110,
-                        height: 110,
-                        margin: EdgeInsets.only(right: 5, left: 5),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            border:
-                                Border.all(color: Colors.grey[300], width: 1),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(16.0)),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
-                                  blurRadius: 2.0,
-                                  spreadRadius: 2.0,
-                                  offset: Offset(4.0, 5.0))
-                            ]),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 Padding(
                   padding:
                       const EdgeInsets.only(left: 15.0, right: 15, top: 20),
                   child: Text(
-                    "This Month's Graph",
+                    "Chart (Past/Future)",
                     style: TextStyle(
                         fontSize: 15,
                         color: COLOR.primaryColor,
@@ -267,80 +459,96 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width,
                     height: 210,
-                    child: LineChart(
-                      LineChartData(
-                        lineTouchData: LineTouchData(enabled: false),
-                        lineBarsData: [
-                          LineChartBarData(
-                            spots: [
-                              FlSpot(0, 4),
-                              FlSpot(1, 3.5),
-                              FlSpot(2, 4.5),
-                              FlSpot(3, 1),
-                              FlSpot(4, 4),
-                              FlSpot(5, 6),
-                              FlSpot(6, 6.5),
-                              FlSpot(7, 6),
-                              FlSpot(8, 4),
-                              FlSpot(9, 6),
-                              FlSpot(10, 6),
-                              FlSpot(11, 7),
-                            ],
-                            isCurved: true,
-                            barWidth: 2,
-                            colors: [
-                              Colors.green,
-                            ],
-                            dotData: FlDotData(
-                              show: false,
-                            ),
-                          ),
-                        ],
-                        titlesData: FlTitlesData(
-                          bottomTitles: SideTitles(
-                              showTitles: true,
-                              getTextStyles: (value) => const TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.purple,
-                                  fontWeight: FontWeight.bold),
-                              getTitles: (value) {
-                                switch (value.toInt()) {
-                                  case 0:
-                                    return 'Jan';
-                                  case 1:
-                                    return 'Feb';
-                                  case 2:
-                                    return 'Mar';
-                                  case 3:
-                                    return 'Apr';
-                                  case 4:
-                                    return 'May';
-                                  case 5:
-                                    return 'Jun';
-                                  case 6:
-                                    return 'Jul';
-                                  case 7:
-                                    return 'Aug';
-                                  case 8:
-                                    return 'Sep';
-                                  case 9:
-                                    return 'Oct';
-                                  case 10:
-                                    return 'Nov';
-                                  case 11:
-                                    return 'Dec';
-                                  default:
-                                    return '';
-                                }
-                              }),
-                          leftTitles: SideTitles(
-                            showTitles: true,
-                            getTitles: (value) {
-                              return '\$ ${value + 0.5}';
-                            },
-                          ),
-                        ),
-                      ),
+                    // child: LineChart(
+                    //   LineChartData(
+                    //     lineTouchData: LineTouchData(enabled: false),
+                    //     lineBarsData: [
+                    //       LineChartBarData(
+                    //         spots: [
+                    //           FlSpot(0, 4),
+                    //           FlSpot(1, 3.5),
+                    //           FlSpot(2, 4.5),
+                    //           FlSpot(3, 1),
+                    //           FlSpot(4, 4),
+                    //           FlSpot(5, 6),
+                    //           FlSpot(6, 6.5),
+                    //           FlSpot(7, 6),
+                    //           FlSpot(8, 4),
+                    //           FlSpot(9, 6),
+                    //           FlSpot(10, 6),
+                    //           FlSpot(11, 7),
+                    //         ],
+                    //         isCurved: true,
+                    //         barWidth: 2,
+                    //         colors: [
+                    //           Colors.green,
+                    //         ],
+                    //         dotData: FlDotData(
+                    //           show: false,
+                    //         ),
+                    //       ),
+                    //       LineChartBarData(
+                    //         spots: [
+                    //           FlSpot(3, 10),
+                    //           FlSpot(10, 3),
+                    //           FlSpot(2, 3.5),
+                    //           FlSpot(3, 1),
+                    //           FlSpot(4, 4),
+                    //           FlSpot(5, 6),
+                    //           FlSpot(6, 6.5),
+                    //           FlSpot(7, 6),
+                    //           FlSpot(8, 4),
+                    //           FlSpot(9, 6),
+                    //           FlSpot(10, 6),
+                    //           FlSpot(11, 7),
+                    //         ],
+                    //         isCurved: true,
+                    //         barWidth: 2,
+                    //         colors: [
+                    //           Colors.red,
+                    //         ],
+                    //         dotData: FlDotData(
+                    //           show: false,
+                    //         ),
+                    //       ),
+                    //     ],
+                    //     titlesData: FlTitlesData(
+                    //       bottomTitles: SideTitles(
+                    //           showTitles: true,
+                    //           getTextStyles: (value) => const TextStyle(
+                    //               fontSize: 10,
+                    //               color: Colors.purple,
+                    //               fontWeight: FontWeight.bold),
+                    //           getTitles: (value) {
+                    //             switch (value.toInt()) {
+                    //               case 0:
+                    //                 return allDates[0];
+                    //               case 1:
+                    //                 return allDates[5];
+                    //               case 2:
+                    //                 return allDates[10];
+                    //               case 3:
+                    //                 return allDates[15];
+                    //               case 4:
+                    //                 return allDates[19];
+                    //               default:
+                    //                 return '';
+                    //             }
+                    //           }),
+                    //       leftTitles: SideTitles(
+                    //         showTitles: true,
+                    //         getTitles: (value) {
+                    //           return '\$ ${value + 0.5}';
+                    //         },
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+                    child: GetDataCopy.length==0 ? Center(
+                      child: Text("No Data Available"),
+                    ):FarmerChart(
+                      data1: data1,
+                      data2:data2,
                     ),
                   ),
                 ),
@@ -356,7 +564,8 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => calculateIncomeScreen(
-                                individualProductData:widget.individualProductData,
+                              individualProductData:
+                                  widget.individualProductData,
                             ),
                           ),
                         );
@@ -401,3 +610,14 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
         ));
   }
 }
+
+class FarmersMlDataGraph {
+  final String Date;
+  final String LowerPrice;
+  final String UpperPrice;
+  final charts.Color barColor;
+
+  FarmersMlDataGraph(
+      {@required this.Date, @required this.LowerPrice, @required this.barColor,@required this.UpperPrice});
+}
+

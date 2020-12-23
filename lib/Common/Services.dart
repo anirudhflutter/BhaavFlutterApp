@@ -59,8 +59,8 @@ class Services {
     }
   }
 
-  static Future<List> getMlData() async {
-    String url = 'http://192.168.29.54:5000/getuserselectedmandi?MandiName=Aatpadi';
+  static Future<List> getMlData(String mandiname) async {
+    String url = cnst.python_url + 'getuserselectedmandi?MandiName=$mandiname';
     print("getMlData url : " + url);
     try {
       final response = await dio.get(url);
@@ -110,20 +110,20 @@ class Services {
     }
   }
 
-  static Future<List> getMandiProducts(String mandiname) async {
+  static Future<List> getMandiProducts(body) async {
     // http://15.206.79.244/getuserselectedmandi?MandiName=Aatpadi
-    String url = "http://192.168.29.54:5000/" + "getuserselectedmandi?MandiName=$mandiname";
+    String url = cnst.API_URL + "api/mandi/getMandiProductPrice";
     print("getMandiProducts url : " + url);
     try {
-      final response = await dio.get(url);
+      final response = await dio.post(url,data: body);
       List list = [];
       // if (response.statusCode == 200) {
         print("response.data");
         print(response.data);
         var memberDataClass = response.data;
-        if (memberDataClass["data"] != 0) {
-          print(memberDataClass["data"]);
-          list = memberDataClass["data"];
+        if (memberDataClass["Data"] != 0) {
+          print(memberDataClass["Data"]);
+          list = memberDataClass["Data"];
         } else {
           list = [];
         }
@@ -137,8 +137,35 @@ class Services {
     }
   }
 
+  static Future<List> getMandiProductsFromPythonApi(String mandiname) async {
+    // http://15.206.79.244/getuserselectedmandi?MandiName=Aatpadi
+    String url = cnst.python_url + "getuserselectedmandi?MandiName=$mandiname";
+    print("getMandiProducts url : " + url);
+    try {
+      final response = await dio.get(url);
+      List list = [];
+      // if (response.statusCode == 200) {
+      print("response.data");
+      print(response.data);
+      var memberDataClass = response.data;
+      if (memberDataClass["data"] != 0) {
+        print(memberDataClass["data"]);
+        list = memberDataClass["data"];
+      } else {
+        list = [];
+      }
+      return list;
+      // } else {
+      //   throw Exception(response.data.toString());
+      // }
+    } catch (e) {
+      print("getMandiProducts Error ${e.toString()}");
+      throw Exception(e.toString());
+    }
+  }
+
   static Future<GetAllProductsDataClass> getProductDetails(body) async {
-    String url = cnst.API_URL + 'api/product/getProductDetails';
+    String url = cnst.API_URL + 'api/admin/getCropPriceInAllMandi';
     print("getProductDetails url : " + url);
     try {
       final response = await dio.post(url, data: body);

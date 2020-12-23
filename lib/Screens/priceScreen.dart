@@ -12,9 +12,12 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
+import 'calculateIncomeScreen.dart';
+
 class PriceScreen extends StatefulWidget {
   Map GetMandiData;
-  PriceScreen({this.GetMandiData});
+  String Image,CropName;
+  PriceScreen({this.GetMandiData,this.Image,this.CropName});
   @override
   _PriceScreenState createState() => _PriceScreenState();
 }
@@ -61,7 +64,7 @@ class _PriceScreenState extends State<PriceScreen> {
         setState(() {
           isLoading = true;
         });
-        print("productid");
+        print(widget.GetMandiData["productId"]["_id"]);
         var data = {
           "productId": widget.GetMandiData["productId"]["_id"],
         };
@@ -73,6 +76,7 @@ class _PriceScreenState extends State<PriceScreen> {
               getProductDetailsData = data.Data;
             });
             print("getProductDetailsData");
+            print(getProductDetailsData);
             print(getProductDetailsData);
           } else {
             // showMsg("${data.Message}");
@@ -94,6 +98,9 @@ class _PriceScreenState extends State<PriceScreen> {
 
   @override
   void initState() {
+    print("mandi data");
+    print(widget.GetMandiData);
+    getProductDetails();
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
     pr.style(
         message: "Please Wait",
@@ -247,22 +254,16 @@ class _PriceScreenState extends State<PriceScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 25.0, top: 12),
-                        // child: Image.asset(
-                        //   "${getProductDetailsData["productId"]["productImage"]}",
-                        //   height: 110,
-                        //   width: 110,
-                        // ),
-                        child: Image.network("https://4.imimg.com/data4/RT/YF/ANDROID-35463146/product-500x500.jpeg",
-                        fit: BoxFit.contain,
-                          height: MediaQuery.of(context).size.height*0.2,
-                          width: MediaQuery.of(context).size.width*0.3,
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.network("${widget.Image}",
+                          height: 150,
+                          width: 150,
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 35.0),
                         child: Text(
-                          "${widget.GetMandiData["CropName"]}",
+                          "${widget.GetMandiData["productId"]["productName"]}",
                           style: TextStyle(
                               fontSize: 22,
                               fontFamily: 'Quick',
@@ -287,7 +288,7 @@ class _PriceScreenState extends State<PriceScreen> {
                           padding: const EdgeInsets.only(left: 5.0, right: 5),
                           child: DropdownButton(
                             dropdownColor: Colors.white,
-                            // hint: Text("Select State"),
+                            hint: Text("Maharashtra"),
                             icon: Icon(
                               Icons.arrow_drop_down,
                               size: 40,
@@ -413,6 +414,8 @@ class _PriceScreenState extends State<PriceScreen> {
                                     builder: (context) => PriceDetailScreen(
                                       individualProductData:
                                           getProductDetailsData[index],
+                                      Image:widget.Image,
+                                      cropName:widget.CropName,
                                     ),
                                   ),
                                 );
@@ -431,31 +434,54 @@ class _PriceScreenState extends State<PriceScreen> {
                                   Column(
                                     children: [
                                       Text(
-                                        "${getProductDetailsData[index]["productId"]["yesterDayPrice"]}" +
+                                        "${getProductDetailsData[index]["yesterDayHigh"]}" +
                                             ".00",
                                       ),
                                       Text(
-                                        "${getProductDetailsData[index]["productId"]["toDayPrice"]}" +
+                                        "${getProductDetailsData[index]["highestPrice"]}" +
                                             ".00",
                                       ),
                                     ],
                                   ),
                                   Column(
                                     children: [
+                                      getProductDetailsData[index]["yesterDayHigh"]
+                                      < getProductDetailsData[index]["highestPrice"] ?
+                                          Text(
+                                            "+" + "${getProductDetailsData[index]["yesterDayHigh"] - getProductDetailsData[index]["highestPrice"]  }",
+                                            style: TextStyle(
+                                              color: Colors.green,
+                                            ),
+                                          ):Text(
+                                          "-" + "${getProductDetailsData[index]["yesterDayHigh"] -  getProductDetailsData[index]["highestPrice"]  }",
+                                        style: TextStyle(
+                                          color: Colors.red,
+                                        ),
+                                      ),
                                       Text(
                                         "${getProductDetailsData[index]["productId"]["priceChangeIndicator"]}" +
                                             ".00",
                                       ),
-                                      Text(
-                                        "${getProductDetailsData[index]["productId"]["toDayPrice"]}",
-                                      ),
                                     ],
                                   ),
-                                  Image.asset(
-                                    "assets/images/shipping.png",
-                                    color: COLOR.primaryColor,
-                                    height: 30,
-                                    width: 30,
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => calculateIncomeScreen(
+                                            individualProductData:
+                                            getProductDetailsData[index],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Image.asset(
+                                      "assets/images/shipping.png",
+                                      color: COLOR.primaryColor,
+                                      height: 30,
+                                      width: 30,
+                                    ),
                                   ),
                                 ],
                               ),

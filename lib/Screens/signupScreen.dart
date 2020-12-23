@@ -113,18 +113,23 @@ class _SignupScreenState extends State<SignupScreen> {
         break;
       }
     }
-    print(stateid);
-    print(cityid);
+
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString(mobileNumber, edtMobileController.text);
-    sharedPreferences.setString(Nameonsignup, edtNameController.text);
-    sharedPreferences.setString(Locationonsignup, edtLocationController.text);
+    sharedPreferences.setString(mobileNumber, edtMobileController.text.toString());
+    sharedPreferences.setString(Nameonsignup, edtNameController.text.toString());
+    sharedPreferences.setString(Locationonsignup, edtLocationController.text.toString());
     sharedPreferences.setDouble(Latitude.toString(), Lat);
     sharedPreferences.setDouble(Longitude.toString(), Long);
     sharedPreferences.setString(
-        Landsizeownedonsignup, edtLandSizeOwnedController.text);
+        Landsizeownedonsignup, edtLandSizeOwnedController.text.toString());
     sharedPreferences.setString(StateonIdsignup, stateid);
     sharedPreferences.setString(DistrictonIdsignup, cityid);
+
+    print("data found");
+    print(mobileNumber);
+    print(Nameonsignup);
+    print(Landsizeownedonsignup);
+    print(StateonIdsignup);
 
     final phoneAuthDataProvider =
     Provider.of<PhoneAuthDataProvider>(context, listen: false);
@@ -176,6 +181,11 @@ class _SignupScreenState extends State<SignupScreen> {
               showMsg("This mobile number is already registered please login");
             } else {
               print("user not found");
+              print(edtMobileController.text);
+              print(edtNameController.text);
+              print(edtLocationController.text);
+              print(edtLandSizeOwnedController.text);
+
               startPhoneAuth();
             }
           }
@@ -563,7 +573,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   SIZE_HEIGHT_LOWEST,
                   SizedBox(
-                    width: 70,
+                    width: 90,
                     height: 35,
                     child: TextField(
                       controller: edtLandSizeOwnedController,
@@ -573,7 +583,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         fontWeight: FontWeight.w700,
                       ),
                       textAlign: TextAlign.center,
-                      maxLength: 4,
+                      maxLength: 10,
                       maxLines: 1,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
@@ -685,10 +695,12 @@ class _SignupScreenState extends State<SignupScreen> {
               //     ),
               //   ),
               // ),
+              SIZE_HEIGHT_LOW,
               Align(
                 alignment: Alignment.center,
                 child: InkWell(
                   onTap: () {
+                    print(edtMobileController.text);
                     if (edtMobileController.text == "" ||
                         edtMobileController.text.length != 10 ||
                         edtNameController.text == "" ||

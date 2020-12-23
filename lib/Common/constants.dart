@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 String API_URL = "http://13.234.119.95/";
-String python_url = "http://192.168.29.54:5000/";
+String python_url = "http://15.206.79.244/";
 
 Map<int, Color> appColorMap1 = {
   50: Color.fromRGBO(56, 31, 113, .1),
@@ -19,11 +19,11 @@ Map<int, Color> appColorMap1 = {
 MaterialColor appPrimaryMaterialColor = MaterialColor(0xFF381F71, appColorMap1);
 
 String mobileNoVerification = "",
-    mobileNumber = "",
-    Nameonsignup = "",
-    Locationonsignup = "",
-    Landsizeownedonsignup = "",
-    StateonIdsignup = "",
+    mobileNumber = "mobilenumber",
+    Nameonsignup = "nameonsignup",
+    Locationonsignup = "location",
+    Landsizeownedonsignup = "landsizeowned",
+    StateonIdsignup = "stateid",
     DistrictonIdsignup = "",FarmerId="";
 var Latitude = 0.0, Longitude = 0.0;
 

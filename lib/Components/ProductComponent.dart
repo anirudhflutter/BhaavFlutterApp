@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class ProductComponent extends StatefulWidget {
   Map GetAllProductsData ;
-  ProductComponent({this.GetAllProductsData});
+  String Image;
+  ProductComponent({this.GetAllProductsData,this.Image});
   @override
   _ProductComponentState createState() => _ProductComponentState();
 }
@@ -33,16 +34,17 @@ class _ProductComponentState extends State<ProductComponent> {
                 child: SizedBox(
                   // width: 90,
                   height: 90,
-                  // child: Image.asset(
-                  //     "${widget.GetAllProductsData["productImage"]}"),
+                  child: Image.network("${widget.Image}",
+                    height: 100,
+                    width: 100,
+                  ),
                 ),
               ),
-
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    "${widget.GetAllProductsData["CropName"]}",
+                    "${widget.GetAllProductsData["productId"]["productName"]}",
                     style: TextStyle(fontFamily: 'Quick', fontSize: 22),
                   ),
                   Padding(
@@ -64,12 +66,12 @@ class _ProductComponentState extends State<ProductComponent> {
                               ),
                             ),
                           ),
-                          // Padding(
-                          //   padding: const EdgeInsets.only(top: 3.0),
-                          //   child: Text(
-                          //     "${widget.GetAllProductsData["lowestPrice"]}"+'₹/Kg',
-                          //   ),
-                          // ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 3.0),
+                            child: Text(
+                              "${widget.GetAllProductsData["yesterDayHigh"]}"+'₹/Kg',
+                            ),
+                          ),
                         ],
                       ),
                       Padding(
@@ -92,24 +94,24 @@ class _ProductComponentState extends State<ProductComponent> {
                               ),
                             ),
                           ),
-                          // Padding(
-                          //   padding: const EdgeInsets.only(top: 1.0, left: 3),
-                          //   child: Text(
-                          //     "${widget.GetAllProductsData["highestPrice"]}"+'₹/Kg',
-                          //     style: TextStyle(
-                          //         fontFamily: 'Quick',
-                          //         fontSize: 15,
-                          //         fontWeight: FontWeight.w600),
-                          //   ),
-                          // ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 1.0, left: 3),
+                            child: Text(
+                              "${widget.GetAllProductsData["highestPrice"]}"+'₹/Kg',
+                              style: TextStyle(
+                                  fontFamily: 'Quick',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
                         ],
                       ),
                     ],
                   )
                 ],
               ),
-              widget.GetAllProductsData["lowestPrice"] <
-                  widget.GetAllProductsData["highestPrice"] ? Padding(
+              widget.GetAllProductsData["highestPrice"] >
+                  widget.GetAllProductsData["yesterDayHigh"] ? Padding(
                 padding: const EdgeInsets.only(right: 15.0),
                 child: Image.asset('assets/images/arrow_up.png'),
               ):Padding(

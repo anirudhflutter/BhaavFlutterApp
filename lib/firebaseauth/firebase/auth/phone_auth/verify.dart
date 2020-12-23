@@ -445,12 +445,8 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
         print("request data to registerUser function");
         print(sharedPreferences.getString(Nameonsignup));
         print(sharedPreferences.getString(mobileNumber));
-        print(sharedPreferences.getDouble(Latitude.toString()));
-        print(sharedPreferences.getDouble(Longitude.toString()));
-        print(sharedPreferences.getString(Locationonsignup));
         print(sharedPreferences.getString(Landsizeownedonsignup));
         print(sharedPreferences.getString(StateonIdsignup));
-        print(sharedPreferences.getString(DistrictonIdsignup));
 
         var data = {
           "name": sharedPreferences.getString(Nameonsignup),
@@ -460,7 +456,7 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
           "completeAddress": sharedPreferences.getString(Locationonsignup),
           "landSizeOwned": sharedPreferences.getString(Landsizeownedonsignup),
           "state": sharedPreferences.getString(StateonIdsignup),
-          "city": sharedPreferences.getString(DistrictonIdsignup)
+          // "city": sharedPreferences.getString(DistrictonIdsignup)
         };
 
         Services.RegisterUser(data).then((data) async {

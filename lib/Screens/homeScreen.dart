@@ -30,8 +30,9 @@ class _HomeScreenState extends State<HomeScreen> {
   String farmerId = "";
   bool isLoading = false;
   String selectMandi;
-  List GetMandiData = [];
-  List GetAllMandiData = [], GetStatesData = [], GetFarmerProductData = [];
+  List GetMandiData = [],GetDataFromPythonApi=[];
+  List GetAllMandiData = [], GetStatesData = [], GetFarmerProductData = [],
+  GetAllMandiDataCopy = [];
 
   @override
   void initState() {
@@ -175,6 +176,11 @@ class _HomeScreenState extends State<HomeScreen> {
           pr.hide();
           if (data.length > 0) {
             GetAllMandiData = data;
+            for(int i=0;i<GetAllMandiData.length;i++) {
+              if(!GetAllMandiDataCopy.contains(GetAllMandiData[i]["mandiname"])) {
+                GetAllMandiDataCopy.add(GetAllMandiData[i]["mandiname"]);
+              }
+            }
             setState(() {
               selectMandi = null;
               isLoading = false;
@@ -196,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  getMandiProducts(String selectedMandi) async {
+  getMandiProducts(String selectedMandiId) async {
     try {
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
@@ -206,16 +212,52 @@ class _HomeScreenState extends State<HomeScreen> {
         });
         print(selectMandi);
         GetMandiData.clear();
-        Services.getMandiProducts(selectedMandi).then((data) async {
+        var body = {
+          "mandiId" :selectedMandiId,
+        };
+        Services.getMandiProducts(body).then((data) async {
           pr.hide();
           if (data.length > 0) {
             setState(() {
               isLoading = false;
               GetMandiData = data;
             });
-            print("getmandiData");
-            print(GetMandiData);
+            getMandiFomrPythonApi(selectMandi);
             getUserLocation();
+          } else {
+            showMsg("");
+          }
+        }, onError: (e) {
+          showMsg("Try Again.");
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        pr.hide();
+        showMsg("No Internet Connection.");
+      }
+    } on SocketException catch (_) {
+      showMsg("No Internet Connection.");
+    }
+  }
+
+  getMandiFomrPythonApi(String selectedMandi) async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        // pr.show();
+        setState(() {
+          isLoading = true;
+        });
+        print(selectMandi);
+        Services.getMandiProductsFromPythonApi(selectedMandi).then((data) async {
+          // pr.hide();
+          if (data.length > 0) {
+            setState(() {
+              isLoading = false;
+              GetDataFromPythonApi = data;
+            });
           } else {
             showMsg("");
           }
@@ -237,7 +279,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List filteredData = [];
   getFilteredData(String value){
      for(int i=0;i<GetMandiData.length;i++){
-       if(GetMandiData[i].toString().contains(value.toLowerCase()) || GetMandiData[i].toString().contains(value.toUpperCase())){
+       if(GetMandiData[i]["productId"]["productName"].toString().toLowerCase().contains(value.toLowerCase())){
         filteredData.add(GetMandiData[i]);
         setState(() {
           GetMandiData = filteredData;
@@ -248,7 +290,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(selectMandi);
+    print(GetMandiData.length);
+    print(GetDataFromPythonApi.length);
     return Scaffold(
       drawer: Drawer(
         child: Column(
@@ -471,21 +514,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       isExpanded: true,
                       value: selectMandi,
                       onChanged: (newvalue) {
+                        print("tapped");
                         String selectedmandiId="";
                         setState(() {
                           selectMandi = newvalue;
                         });
-                        // for(int i=0;i<GetAllMandiData.length;i++){
-                        //   if(GetAllMandiData[i]["MandiName"].toString().replaceAll(".csv", "")==selectMandi){
-                        //     selectedmandiId = GetAllMandiData[i]["_id"];
-                        //     break;
-                        //   }
-                        // }
-                        // print("selectedmandiid");
-                        // print(selectedmandiId);
-                        getMandiProducts(selectMandi);
+                        for(int i=0;i<GetAllMandiData.length;i++){
+                          if(GetAllMandiData[i]["mandiname"]==selectMandi){
+                            selectedmandiId = GetAllMandiData[i]["id"];
+                            break;
+                          }
+                        }
+                        print("selectedmandiid");
+                        print(selectedmandiId);
+                        getMandiProducts(selectedmandiId);
                       },
-                      items: GetAllMandiData.map(
+                      items: GetAllMandiDataCopy.map(
                         (Location) {
                           return DropdownMenuItem(
                             child: Text(Location),
@@ -519,53 +563,53 @@ class _HomeScreenState extends State<HomeScreen> {
             //     controller: edtLocationController,
             //   ),
             // ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 12.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        keyboardType: TextInputType.text,
-                        enabled: true,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          labelText: BaseLang.getTypeToSearch(),
-                          labelStyle: TextStyle(
-                              fontFamily: "Quick", color: Colors.black45),
-                          contentPadding: EdgeInsets.all(12.0),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(4.0)),
-                            borderSide: BorderSide(color: Color(0xCCF07544)),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(4.0)),
-                            borderSide: BorderSide(color: Color(0xCCF07544)),
-                          ),
-                        ),
-                        onChanged: (value) {
-                          print(value);
-                          getFilteredData(value);
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 5),
-                      child: InkWell(
-                        child: Image.asset(
-                          'assets/images/search.png',
-                          width: 30,
-                          height: 25,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
+            // Container(
+            //   padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+            //   child: Padding(
+            //     padding: const EdgeInsets.only(top: 12.0),
+            //     child: Row(
+            //       children: [
+            //         Expanded(
+            //           child: TextField(
+            //             keyboardType: TextInputType.text,
+            //             enabled: true,
+            //             decoration: InputDecoration(
+            //               isDense: true,
+            //               labelText: BaseLang.getTypeToSearch(),
+            //               labelStyle: TextStyle(
+            //                   fontFamily: "Quick", color: Colors.black45),
+            //               contentPadding: EdgeInsets.all(12.0),
+            //               enabledBorder: OutlineInputBorder(
+            //                 borderRadius:
+            //                     BorderRadius.all(Radius.circular(4.0)),
+            //                 borderSide: BorderSide(color: Color(0xCCF07544)),
+            //               ),
+            //               focusedBorder: OutlineInputBorder(
+            //                 borderRadius:
+            //                     BorderRadius.all(Radius.circular(4.0)),
+            //                 borderSide: BorderSide(color: Color(0xCCF07544)),
+            //               ),
+            //             ),
+            //             onChanged: (value) {
+            //               print(value);
+            //               getFilteredData(value);
+            //             },
+            //           ),
+            //         ),
+            //         Padding(
+            //           padding: const EdgeInsets.only(left: 5),
+            //           child: InkWell(
+            //             child: Image.asset(
+            //               'assets/images/search.png',
+            //               width: 30,
+            //               height: 25,
+            //             ),
+            //           ),
+            //         )
+            //       ],
+            //     ),
+            //   ),
+            // ),
              selectMandi==null && GetAllMandiData.length>0
                 ? Padding(
               padding: const EdgeInsets.only(top: 100.0),
@@ -579,7 +623,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             )
-                :  GetMandiData.length==0
+                :  GetMandiData.length==0 || GetDataFromPythonApi.length==0
                 ? Padding(
               padding: const EdgeInsets.only(top: 100.0),
               child: Center(
@@ -598,7 +642,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ListView.builder(
                         itemCount: GetMandiData.length,
                         itemBuilder: (context, index) {
-                          print(GetMandiData.length);
                           return InkWell(
                             onTap: () {
                               Navigator.push(
@@ -606,13 +649,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                 MaterialPageRoute(
                                   builder: (context) => PriceScreen(
                                     GetMandiData: GetMandiData[index],
+                                    Image:GetDataFromPythonApi[index]["CropImage"],
+                                    CropName:GetDataFromPythonApi[index]["CropName"],
                                   ),
                                 ),
                               );
                             },
                             child: ProductComponent(
                               GetAllProductsData: GetMandiData[index],
-                                  // ["productId"],
+                              Image:GetDataFromPythonApi[index]["CropImage"],
+                              // ["productId"],
                             ),
                           );
                         }),

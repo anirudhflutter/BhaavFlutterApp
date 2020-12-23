@@ -251,65 +251,65 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                             onFieldSubmitted: (value){
                               setState(() {
                                 totalCost =
-                                    widget.individualProductData["productId"]["toDayPrice"]
+                                    widget.individualProductData["lowestPrice"]
                                         *int.parse(value);
                               });
                             },
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 15, left: 8),
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 20.0, top: 30),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.grey,
-                                          shape: BoxShape.circle),
-                                      height: 14,
-                                      width: 14,
-                                      // child: Text("data"),
-                                    ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.grey,
-                                          shape: BoxShape.rectangle),
-                                      height: 85,
-                                      width: 2,
-                                      // child: Text("data"),
-                                    ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          color: COLOR.primaryColor,
-                                          shape: BoxShape.circle),
-                                      height: 14,
-                                      width: 14,
-                                      // child: Text("data"),
-                                    )
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    myaddress.toString(),
-                                  ),
-                                  SizedBox(
-                                    height: MediaQuery.of(context).padding.top + 30,                                  ),
-                                  Text(
-                                      "${widget.individualProductData["mandiId"]["location"]["completeAddress"]}",
-                                      ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
+                        // Padding(
+                        //   padding: const EdgeInsets.only(top: 15, left: 8),
+                        //   child: Row(
+                        //     children: [
+                        //       Padding(
+                        //         padding:
+                        //             const EdgeInsets.only(left: 20.0, top: 30),
+                        //         child: Column(
+                        //           children: [
+                        //             Container(
+                        //               decoration: BoxDecoration(
+                        //                   color: Colors.grey,
+                        //                   shape: BoxShape.circle),
+                        //               height: 14,
+                        //               width: 14,
+                        //               // child: Text("data"),
+                        //             ),
+                        //             Container(
+                        //               decoration: BoxDecoration(
+                        //                   color: Colors.grey,
+                        //                   shape: BoxShape.rectangle),
+                        //               height: 85,
+                        //               width: 2,
+                        //               // child: Text("data"),
+                        //             ),
+                        //             Container(
+                        //               decoration: BoxDecoration(
+                        //                   color: COLOR.primaryColor,
+                        //                   shape: BoxShape.circle),
+                        //               height: 14,
+                        //               width: 14,
+                        //               // child: Text("data"),
+                        //             )
+                        //           ],
+                        //         ),
+                        //       ),
+                        //       Column(
+                        //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //         crossAxisAlignment: CrossAxisAlignment.start,
+                        //         children: [
+                        //           Text(
+                        //             myaddress.toString(),
+                        //           ),
+                        //           SizedBox(
+                        //             height: MediaQuery.of(context).padding.top + 30,                                  ),
+                        //           // Text(
+                        //           //     "${widget.individualProductData["mandiId"]["location"]["completeAddress"]}",
+                        //           //     ),
+                        //         ],
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
                         SizedBox(
                           height: MediaQuery.of(context).padding.top + 20,
                         ),
@@ -511,7 +511,7 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                             onFieldSubmitted: (value){
                               setState(() {
                                 totalCost =
-                                    widget.individualProductData["productId"]["toDayPrice"]
+                                    widget.individualProductData["productId"]["lowestPrice"]
                                         *int.parse(value);
                               });
                             },
@@ -614,64 +614,64 @@ class _calculateIncomeScreenState extends State<calculateIncomeScreen>
                             ],
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 20.0, top: 25),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.grey,
-                                          shape: BoxShape.circle),
-                                      height: 14,
-                                      width: 14,
-                                      // child: Text("data"),
-                                    ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.grey,
-                                          shape: BoxShape.rectangle),
-                                      height: 65,
-                                      width: 2,
-                                      // child: Text("data"),
-                                    ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          color: COLOR.primaryColor,
-                                          shape: BoxShape.circle),
-                                      height: 14,
-                                      width: 14,
-                                      // child: Text("data"),
-                                    )
-                                  ],
-                                ),
-                              ),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 8.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        myaddress.toString(),
-                                      ),
-                                      SizedBox(
-                                        height: MediaQuery.of(context).padding.top + 30,                                  ),
-                                      Text(
-                                        "${widget.individualProductData["mandiId"]["location"]["completeAddress"]}",
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        // Padding(
+                        //   padding: const EdgeInsets.only(left: 8),
+                        //   child: Row(
+                        //     children: [
+                        //       Padding(
+                        //         padding:
+                        //             const EdgeInsets.only(left: 20.0, top: 25),
+                        //         child: Column(
+                        //           children: [
+                        //             Container(
+                        //               decoration: BoxDecoration(
+                        //                   color: Colors.grey,
+                        //                   shape: BoxShape.circle),
+                        //               height: 14,
+                        //               width: 14,
+                        //               // child: Text("data"),
+                        //             ),
+                        //             Container(
+                        //               decoration: BoxDecoration(
+                        //                   color: Colors.grey,
+                        //                   shape: BoxShape.rectangle),
+                        //               height: 65,
+                        //               width: 2,
+                        //               // child: Text("data"),
+                        //             ),
+                        //             Container(
+                        //               decoration: BoxDecoration(
+                        //                   color: COLOR.primaryColor,
+                        //                   shape: BoxShape.circle),
+                        //               height: 14,
+                        //               width: 14,
+                        //               // child: Text("data"),
+                        //             )
+                        //           ],
+                        //         ),
+                        //       ),
+                        //       Expanded(
+                        //         child: Padding(
+                        //           padding: const EdgeInsets.only(right: 8.0),
+                        //           child: Column(
+                        //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //             crossAxisAlignment: CrossAxisAlignment.start,
+                        //             children: [
+                        //               Text(
+                        //                 myaddress.toString(),
+                        //               ),
+                        //               SizedBox(
+                        //                 height: MediaQuery.of(context).padding.top + 30,                                  ),
+                        //               // Text(
+                        //               //   "${widget.individualProductData["mandiId"]["location"]["completeAddress"]}",
+                        //               // ),
+                        //             ],
+                        //           ),
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
                         SizedBox(
                           height: MediaQuery.of(context).padding.top + 10,
                         ),
