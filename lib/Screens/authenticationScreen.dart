@@ -5,13 +5,19 @@ import 'package:bhaav/Screens/signupScreen.dart';
 import 'package:flutter/material.dart';
 
 class AuthenticationScreen extends StatefulWidget {
-  String LanguageSelected="";
-AuthenticationScreen({this.LanguageSelected});
+
+AuthenticationScreen();
   @override
   _AuthenticationScreenState createState() => _AuthenticationScreenState();
 }
 
 class _AuthenticationScreenState extends State<AuthenticationScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

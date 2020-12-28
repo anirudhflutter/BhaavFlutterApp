@@ -393,7 +393,7 @@ class EnglishLang {
   static String typeToSearch = "Type to Search";
   static String yesterday = "yesterday";
   static String today = "today";
-  static String kg = "kg";
+  static String kg = "Quintal";
   static String value = "Value";
   static String change = "Change";
   static String sell = "Sell";
@@ -414,11 +414,11 @@ class EnglishLang {
   static String extraCost = "Extra Cost";
   static String selectDate = "Select Date";
   static String expectedPrice = "Expected Price";
-  static String trackSells = "Track Sells";
+  static String trackSells = "Track Sales";
   static String sellHistory = "Sells History";
   static String support = "Support";
   static String logout = "Logout";
-  static String sales = "Track Sells";
+  static String sales = "Track Sales";
   static String goods = "Goods";
   static String status = "Status";
   static String marathi = "MARATHI";

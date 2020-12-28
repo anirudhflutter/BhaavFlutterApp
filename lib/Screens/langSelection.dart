@@ -1,6 +1,7 @@
 import 'package:bhaav/Common/constants.dart';
 import 'package:bhaav/Common/langString.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'authenticationScreen.dart';
 
@@ -12,6 +13,12 @@ class LangSelection extends StatefulWidget {
 }
 
 class _LangSelectionState extends State<LangSelection> {
+
+  selectedlanguage() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setString(languageselection, "Marathi");
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -92,11 +99,9 @@ class _LangSelectionState extends State<LangSelection> {
                   children: [
                     InkWell(
                       onTap: () {
+                        selectedlanguage();
                         setState(() {
                           BaseLang.currentLang = LANG.MARATHI;
-                          Navigator.push(context, 
-                          MaterialPageRoute(builder: (context) => AuthenticationScreen(LanguageSelected:"Marathi"))
-                          );
                           Navigator.of(context)
                               .pushNamed('/AuthenticationScreen');
                         });
@@ -200,14 +205,4 @@ class _LangSelectionState extends State<LangSelection> {
       ),
     );
   }
-
-  /* void goToNextScreen() {
-    //if from SplashScreen go to LogIn Screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AuthenticationScreen(),
-      ),
-    );
-  }*/
 }

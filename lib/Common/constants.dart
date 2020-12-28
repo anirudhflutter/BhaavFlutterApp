@@ -19,12 +19,12 @@ Map<int, Color> appColorMap1 = {
 MaterialColor appPrimaryMaterialColor = MaterialColor(0xFF381F71, appColorMap1);
 
 String mobileNoVerification = "",
-    mobileNumber = "mobilenumber",
+    mobilenumber = "mobilenumber",
     Nameonsignup = "nameonsignup",
     Locationonsignup = "location",
     Landsizeownedonsignup = "landsizeowned",
     StateonIdsignup = "stateid",
-    DistrictonIdsignup = "",FarmerId="";
+    DistrictonIdsignup = "",FarmerId="farmerid",languageselection="language";
 var Latitude = 0.0, Longitude = 0.0;
 
 const SIZE_HEIGHT_NORMAL = SizedBox(

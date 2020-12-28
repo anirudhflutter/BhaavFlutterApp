@@ -16,15 +16,13 @@ import 'calculateIncomeScreen.dart';
 
 class PriceScreen extends StatefulWidget {
   Map GetMandiData;
-  String Image,CropName;
-  PriceScreen({this.GetMandiData,this.Image,this.CropName});
+  String language="";
+  PriceScreen({this.GetMandiData,this.language});
   @override
   _PriceScreenState createState() => _PriceScreenState();
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  String _selectState;
-  // String _selectCity;
 
   ProgressDialog pr;
   bool isLoading = false;
@@ -98,8 +96,8 @@ class _PriceScreenState extends State<PriceScreen> {
 
   @override
   void initState() {
-    print("mandi data");
-    print(widget.GetMandiData);
+    print("language inside pricescreen.dart");
+    print(widget.language);
     getProductDetails();
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
     pr.style(
@@ -158,64 +156,64 @@ class _PriceScreenState extends State<PriceScreen> {
     }
   }
 
-  getMandiWiseCrop(String selectedStateId) async {
-    try {
-      print("selectedStateId");
-      print(selectedStateId);
-      //check Internet Connection
-      final result = await InternetAddress.lookup('google.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        pr.show();
-        setState(() {
-          isLoading = true;
-        });
-        print("MandiId");
-        print(widget.GetMandiData["MandiId"]);
-        var data = {
-          "stateId" : selectedStateId.toString(),
-          "mandiId" : widget.GetMandiData["MandiId"].toString()
-        };
-        Services.getMandiWiseCrop(data).then((data) async {
-          if (data.length > 0) {
-            pr.hide();
-            setState(() {
-              isLoading = false;
-              getProductDetailsData = data;
-            });
-            print("getProductDetailsData");
-            print(getProductDetailsData);
-            // for (int i = 0; i < GetDataForCities.length; i++) {
-            //   if(selectedStateId==GetDataForCities[i]["State"]["_id"].toString()){
-            //     print("found");
-            //     if(!CitiesDropDown.contains(GetDataForCities[i]["City"])) {
-            //       CitiesDropDown.add(GetDataForCities[i]["City"]);
-            //     }
-            //   }
-            // }
-          }
-          else{
-            setState(() {
-              getProductDetailsData.clear();
-            });
-            pr.hide();
-            print("No data found");
-            // showMsg("No Data Found");
-          }
-        }, onError: (e) {
-          pr.hide();
-          showMsg("Try Again.");
-        });
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-        pr.hide();
-        showMsg("No Internet Connection.");
-      }
-    } on SocketException catch (_) {
-      showMsg("No Internet Connection.");
-    }
-  }
+  // getMandiWiseCrop(String selectedStateId) async {
+  //   try {
+  //     print("selectedStateId");
+  //     print(selectedStateId);
+  //     //check Internet Connection
+  //     final result = await InternetAddress.lookup('google.com');
+  //     if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+  //       pr.show();
+  //       setState(() {
+  //         isLoading = true;
+  //       });
+  //       print("MandiId");
+  //       print(widget.GetMandiData["MandiId"]);
+  //       var data = {
+  //         "stateId" : selectedStateId.toString(),
+  //         "mandiId" : widget.GetMandiData["MandiId"].toString()
+  //       };
+  //       Services.getMandiWiseCrop(data).then((data) async {
+  //         if (data.length > 0) {
+  //           pr.hide();
+  //           setState(() {
+  //             isLoading = false;
+  //             getProductDetailsData = data;
+  //           });
+  //           print("getProductDetailsData");
+  //           print(getProductDetailsData);
+  //           // for (int i = 0; i < GetDataForCities.length; i++) {
+  //           //   if(selectedStateId==GetDataForCities[i]["State"]["_id"].toString()){
+  //           //     print("found");
+  //           //     if(!CitiesDropDown.contains(GetDataForCities[i]["City"])) {
+  //           //       CitiesDropDown.add(GetDataForCities[i]["City"]);
+  //           //     }
+  //           //   }
+  //           // }
+  //         }
+  //         else{
+  //           setState(() {
+  //             getProductDetailsData.clear();
+  //           });
+  //           pr.hide();
+  //           print("No data found");
+  //           // showMsg("No Data Found");
+  //         }
+  //       }, onError: (e) {
+  //         pr.hide();
+  //         showMsg("Try Again.");
+  //       });
+  //     } else {
+  //       setState(() {
+  //         isLoading = false;
+  //       });
+  //       pr.hide();
+  //       showMsg("No Internet Connection.");
+  //     }
+  //   } on SocketException catch (_) {
+  //     showMsg("No Internet Connection.");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -238,8 +236,15 @@ class _PriceScreenState extends State<PriceScreen> {
             ),
           ),
         ),
-        title: Text(
+        title: widget.language!="Marathi" ? Text(
           BaseLang.getPrice(),
+          style: TextStyle(
+            fontFamily: 'Quick',
+            color: Colors.white,
+          ),
+        ):
+        Text(
+          "किंमत",
           style: TextStyle(
             fontFamily: 'Quick',
             color: Colors.white,
@@ -255,19 +260,30 @@ class _PriceScreenState extends State<PriceScreen> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Image.network("${widget.Image}",
+                        child: Image.network(
+                          "http://13.234.119.95/" +
+                          "${widget.GetMandiData["productId"]["productImage"]}",
                           height: 150,
                           width: 150,
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 35.0),
-                        child: Text(
-                          "${widget.GetMandiData["productId"]["productName"]}",
-                          style: TextStyle(
-                              fontSize: 22,
-                              fontFamily: 'Quick',
-                              fontWeight: FontWeight.bold),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width*0.4,
+                          child: widget.language=="Marathi" ? Text(
+                            "${widget.GetMandiData["productId"]["productMarathiName"]}",
+                            style: TextStyle(
+                                fontSize: 22,
+                                fontFamily: 'Quick',
+                                fontWeight: FontWeight.bold),
+                          ):Text(
+                            "${widget.GetMandiData["productId"]["productName"]}",
+                            style: TextStyle(
+                                fontSize: 22,
+                                fontFamily: 'Quick',
+                                fontWeight: FontWeight.bold),
+                          ),
                         ),
                       )
                     ],
@@ -288,7 +304,8 @@ class _PriceScreenState extends State<PriceScreen> {
                           padding: const EdgeInsets.only(left: 5.0, right: 5),
                           child: DropdownButton(
                             dropdownColor: Colors.white,
-                            hint: Text("Maharashtra"),
+                            hint: widget.language=="Marathi" ?
+                            Text("महाराष्ट्र"):Text("Maharashtra"),
                             icon: Icon(
                               Icons.arrow_drop_down,
                               size: 40,
@@ -366,7 +383,21 @@ class _PriceScreenState extends State<PriceScreen> {
                   // ),
                   Padding(
                     padding: const EdgeInsets.only(top: 12.0),
-                    child: Row(
+                    child:  widget.language=="Marathi" ? Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                       Container(
+                            width: MediaQuery.of(context).size.width / 3,
+                            child: Text("1 दिवस",
+                                style: TextStyle(color: COLOR.primaryColor))),
+                        Text("मूल्य",
+                            style: TextStyle(color: COLOR.primaryColor)),
+                        Text("बदल",
+                            style: TextStyle(color: COLOR.primaryColor)),
+                        Text("विक्री करा",
+                            style: TextStyle(color: COLOR.primaryColor)),
+                      ],
+                    ):Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Container(
@@ -414,8 +445,9 @@ class _PriceScreenState extends State<PriceScreen> {
                                     builder: (context) => PriceDetailScreen(
                                       individualProductData:
                                           getProductDetailsData[index],
-                                      Image:widget.Image,
-                                      cropName:widget.CropName,
+                                      language:widget.language
+                                      // Image:widget.Image,
+                                      // cropName:widget.CropName,
                                     ),
                                   ),
                                 );
@@ -427,7 +459,9 @@ class _PriceScreenState extends State<PriceScreen> {
                                   Container(
                                     width:
                                         MediaQuery.of(context).size.width / 3,
-                                    child: Text(
+                                    child: widget.language=="Marathi" ? Text(
+                                      "${getProductDetailsData[index]["mandiId"]["MandiMarathiName"]}",
+                                    ):Text(
                                       "${getProductDetailsData[index]["mandiId"]["MandiName"]}",
                                     ),
                                   ),
@@ -445,10 +479,11 @@ class _PriceScreenState extends State<PriceScreen> {
                                   ),
                                   Column(
                                     children: [
-                                      getProductDetailsData[index]["yesterDayHigh"]
+                                      getProductDetailsData[index]["yesterDayHigh"]!=null && getProductDetailsData[index]["highestPrice"]!=null
+                                          ? getProductDetailsData[index]["yesterDayHigh"]
                                       < getProductDetailsData[index]["highestPrice"] ?
                                           Text(
-                                            "+" + "${getProductDetailsData[index]["yesterDayHigh"] - getProductDetailsData[index]["highestPrice"]  }",
+                                            "+" + "${getProductDetailsData[index]["highestPrice"] - getProductDetailsData[index]["yesterDayHigh"]  }",
                                             style: TextStyle(
                                               color: Colors.green,
                                             ),
@@ -457,7 +492,7 @@ class _PriceScreenState extends State<PriceScreen> {
                                         style: TextStyle(
                                           color: Colors.red,
                                         ),
-                                      ),
+                                      ):Container(),
                                       Text(
                                         "${getProductDetailsData[index]["productId"]["priceChangeIndicator"]}" +
                                             ".00",

@@ -17,9 +17,9 @@ import '../MlDataGraphChart.dart';
 
 class PriceDetailScreen extends StatefulWidget {
   Map individualProductData;
-  String Image = "", cropName = "";
+  String language="";
 
-  PriceDetailScreen({this.individualProductData, this.Image, this.cropName});
+  PriceDetailScreen({this.individualProductData,this.language});
 
   @override
   _PriceDetailScreenState createState() => _PriceDetailScreenState();
@@ -32,9 +32,10 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
 
   @override
   void initState() {
-    print(widget.cropName);
     getMlData(
-        widget.individualProductData["mandiId"]["MandiName"], widget.cropName);
+        widget.individualProductData["mandiId"]["MandiName"],
+        widget.individualProductData["productId"]["productName"]
+    );
     super.initState();
   }
 
@@ -53,11 +54,15 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
               print(cropName);
               print("data cropname");
               print(data[i]["CropName"]);
-              if (data[i]["CropName"] == cropName) {
+              if (data[i]["CropName"].toString().toLowerCase() == cropName.toLowerCase()) {
                 found = true;
                 GetData.add(data[i]["Data"]);
               }
             }
+            print("GetData");
+            print(GetData);
+            print("found");
+            print(found);
             if (found == true) {
               GetDataIndexWise();
             }
@@ -145,6 +150,8 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
           ],
         ),
       );
+      print("GetDataCopy");
+      print(GetDataCopy);
     }
   }
 
@@ -170,7 +177,13 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
               ),
             ),
           ),
-          title: Text(
+          title: widget.language=="Marathi" ? Text(
+            "किंमत तपशील",
+            style: TextStyle(
+              fontFamily: 'Quick',
+              color: Colors.white,
+            ),
+          ):Text(
             BaseLang.getPriceDetail(),
             style: TextStyle(
               fontFamily: 'Quick',
@@ -190,14 +203,21 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Image.network(
-                        "${widget.Image}",
+                        "http://13.234.119.95/" +
+                        "${widget.individualProductData["productId"]["productImage"]}",
                         height: 150,
                         width: 150,
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 35.0),
-                      child: Text(
+                      child: widget.language=="Marathi" ? Text(
+                        "${widget.individualProductData["productId"]["productMarathiName"]}",
+                        style: TextStyle(
+                            fontSize: 22,
+                            fontFamily: 'Quick',
+                            fontWeight: FontWeight.bold),
+                      ):Text(
                         "${widget.individualProductData["productId"]["productName"]}",
                         style: TextStyle(
                             fontSize: 22,
@@ -214,8 +234,9 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                     decoration: InputDecoration(
                       hintText: "Enter Mandi Name",
                       isDense: true,
-                      labelText:
-                          "${widget.individualProductData["mandiId"]["MandiName"]}",
+                      labelText: widget.language=="Marathi"?
+                      "${widget.individualProductData["mandiId"]["MandiMarathiName"]}":
+                      "${widget.individualProductData["mandiId"]["MandiName"]}",
                       //BaseLang.getFullName(),
                       labelStyle: TextStyle(
                           fontFamily: "Quick", color: COLOR.primaryColor),
@@ -253,8 +274,15 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                         const EdgeInsets.only(left: 15.0, right: 15, top: 20),
                     child: Row(
                       children: [
-                        Text(
-                          "Pricing (Past/Future)",
+                        widget.language=="Marathi" ? Text(
+                          "किंमत (मागील / भविष्य)",
+                          style: TextStyle(
+                              fontSize: 15,
+                              color: COLOR.primaryColor,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: 'Quick'),
+                        ):Text(
+                          "कPricing (Past/Future)",
                           style: TextStyle(
                               fontSize: 15,
                               color: COLOR.primaryColor,
@@ -400,12 +428,22 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                               ? Center(
                                   child: Padding(
                                     padding: const EdgeInsets.only(top: 50.0),
-                                    child: Text("No Data Found"),
+                                    child: widget.language=="Marathi" ?
+                                    Text("माहिती आढळली नाही"):Text("No Data Found"),
                                   ),
                                 )
                               : DataTable(
-                                  columns: const <DataColumn>[
-                                    DataColumn(
+                                  columns:  <DataColumn>[
+                                    widget.language=="Marathi" ? DataColumn(
+                                      label: Text(
+                                        'तारीख',
+                                        style: TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: 14,
+                                          color: Colors.deepOrange,
+                                        ),
+                                      ),
+                                    ):DataColumn(
                                       label: Text(
                                         'Date',
                                         style: TextStyle(
@@ -415,7 +453,16 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                                         ),
                                       ),
                                     ),
-                                    DataColumn(
+                                    widget.language=="Marathi" ?DataColumn(
+                                      label: Text(
+                                        'सर्वात कमी\nकिंमत\n(क्विंटल)',
+                                        style: TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: 14,
+                                          color: Colors.deepOrange,
+                                        ),
+                                      ),
+                                    ):DataColumn(
                                       label: Text(
                                         'Lowest\nPrice\n(Quintal)',
                                         style: TextStyle(
@@ -425,7 +472,16 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                                         ),
                                       ),
                                     ),
-                                    DataColumn(
+                                    widget.language=="Marathi" ?DataColumn(
+                                      label: Text(
+                                        'सर्वाधिक\n किमत\n(क्विंटल)',
+                                        style: TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: 14,
+                                          color: Colors.deepOrange,
+                                        ),
+                                      ),
+                                    ):DataColumn(
                                       label: Text(
                                         'Highest\nPrice\n(Quintal)',
                                         style: TextStyle(
@@ -444,7 +500,15 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                 Padding(
                   padding:
                       const EdgeInsets.only(left: 15.0, right: 15, top: 20),
-                  child: Text(
+                  child: widget.language=="Marathi" ?
+                   Text(
+                    "चार्ट (मागील / भविष्य)",
+                    style: TextStyle(
+                        fontSize: 15,
+                        color: COLOR.primaryColor,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: 'Quick'),
+                  ): Text(
                     "Chart (Past/Future)",
                     style: TextStyle(
                         fontSize: 15,
@@ -459,93 +523,9 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width,
                     height: 210,
-                    // child: LineChart(
-                    //   LineChartData(
-                    //     lineTouchData: LineTouchData(enabled: false),
-                    //     lineBarsData: [
-                    //       LineChartBarData(
-                    //         spots: [
-                    //           FlSpot(0, 4),
-                    //           FlSpot(1, 3.5),
-                    //           FlSpot(2, 4.5),
-                    //           FlSpot(3, 1),
-                    //           FlSpot(4, 4),
-                    //           FlSpot(5, 6),
-                    //           FlSpot(6, 6.5),
-                    //           FlSpot(7, 6),
-                    //           FlSpot(8, 4),
-                    //           FlSpot(9, 6),
-                    //           FlSpot(10, 6),
-                    //           FlSpot(11, 7),
-                    //         ],
-                    //         isCurved: true,
-                    //         barWidth: 2,
-                    //         colors: [
-                    //           Colors.green,
-                    //         ],
-                    //         dotData: FlDotData(
-                    //           show: false,
-                    //         ),
-                    //       ),
-                    //       LineChartBarData(
-                    //         spots: [
-                    //           FlSpot(3, 10),
-                    //           FlSpot(10, 3),
-                    //           FlSpot(2, 3.5),
-                    //           FlSpot(3, 1),
-                    //           FlSpot(4, 4),
-                    //           FlSpot(5, 6),
-                    //           FlSpot(6, 6.5),
-                    //           FlSpot(7, 6),
-                    //           FlSpot(8, 4),
-                    //           FlSpot(9, 6),
-                    //           FlSpot(10, 6),
-                    //           FlSpot(11, 7),
-                    //         ],
-                    //         isCurved: true,
-                    //         barWidth: 2,
-                    //         colors: [
-                    //           Colors.red,
-                    //         ],
-                    //         dotData: FlDotData(
-                    //           show: false,
-                    //         ),
-                    //       ),
-                    //     ],
-                    //     titlesData: FlTitlesData(
-                    //       bottomTitles: SideTitles(
-                    //           showTitles: true,
-                    //           getTextStyles: (value) => const TextStyle(
-                    //               fontSize: 10,
-                    //               color: Colors.purple,
-                    //               fontWeight: FontWeight.bold),
-                    //           getTitles: (value) {
-                    //             switch (value.toInt()) {
-                    //               case 0:
-                    //                 return allDates[0];
-                    //               case 1:
-                    //                 return allDates[5];
-                    //               case 2:
-                    //                 return allDates[10];
-                    //               case 3:
-                    //                 return allDates[15];
-                    //               case 4:
-                    //                 return allDates[19];
-                    //               default:
-                    //                 return '';
-                    //             }
-                    //           }),
-                    //       leftTitles: SideTitles(
-                    //         showTitles: true,
-                    //         getTitles: (value) {
-                    //           return '\$ ${value + 0.5}';
-                    //         },
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
                     child: GetDataCopy.length==0 ? Center(
-                      child: Text("No Data Available"),
+                      child: widget.language=="Marathi" ?
+                      Text("माहिती उपलब्ध नाही"):Text("No Data Available"),
                     ):FarmerChart(
                       data1: data1,
                       data2:data2,
@@ -566,6 +546,7 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                             builder: (context) => calculateIncomeScreen(
                               individualProductData:
                                   widget.individualProductData,
+                              language : widget.language
                             ),
                           ),
                         );
@@ -590,7 +571,16 @@ class _PriceDetailScreenState extends State<PriceDetailScreen> {
                             ),
                             Expanded(
                               child: Center(
-                                child: Text(
+                                child:  widget.language=="Marathi" ?
+                                Text(
+                                  "उत्पन्नाची गणना करा",
+                                  style: TextStyle(
+                                    fontSize: 19,
+                                    color: COLOR.primaryColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ):
+                                Text(
                                   "Calculate Income",
                                   style: TextStyle(
                                     fontSize: 19,

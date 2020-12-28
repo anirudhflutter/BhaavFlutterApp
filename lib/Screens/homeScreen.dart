@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:http/http.dart';
 import 'package:bhaav/Common/Services.dart';
 import 'package:bhaav/Common/constants.dart';
@@ -18,27 +19,24 @@ import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_webservice/places.dart';
 
 class HomeScreen extends StatefulWidget {
+  HomeScreen();
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-double _value = 0;
-double areaToBeSearched = 0;
 
 class _HomeScreenState extends State<HomeScreen> {
   ProgressDialog pr;
   String farmerId = "";
   bool isLoading = false;
-  String selectMandi;
+  String selectMandi,selectcompany;
   List GetMandiData = [],GetDataFromPythonApi=[];
   List GetAllMandiData = [], GetStatesData = [], GetFarmerProductData = [],
   GetAllMandiDataCopy = [];
 
   @override
   void initState() {
-    getAllMandi();
     GetLocalData();
-    // getUserLocation();
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
     pr.style(
         message: "Please Wait",
@@ -58,13 +56,56 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   loc.LocationData currentLocation;
-  String address = "";
+  String address = "",language="";
   double Lat = 0.0, Long = 0.0;
 
   GetLocalData() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     farmerId = sharedPreferences.getString(FarmerId);
+    language = sharedPreferences.getString(languageselection);
+    getAllMandi();
   }
+
+  List AllCompanies = [],companiesdata=[],selectedcompany=[];
+  getAllCompanies() async {
+    try {
+      //check Internet Connection
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        pr.show();
+        setState(() {
+          isLoading = true;
+        });
+        Services.getComapnyList().then((data) async {
+          pr.hide();
+          if (data[0].length > 0) {
+            companiesdata = data[0];
+              for(int i=0;i<data[0].length;i++) {
+                if(!AllCompanies.contains(data[0][i]["companyName"].toString())) {
+                  AllCompanies.add(data[0][i]["companyName"].toString());
+                }
+              }
+            setState(() {
+              selectcompany = null;
+              isLoading = false;
+            });
+          } else {
+          }
+        }, onError: (e) {
+          showMsg("Try Again.");
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        pr.hide();
+        showMsg("No Internet Connection.");
+      }
+    } on SocketException catch (_) {
+      showMsg("No Internet Connection.");
+    }
+  }
+
 
   getUserLocation() async {
     loc.LocationData myLocation;
@@ -115,10 +156,8 @@ class _HomeScreenState extends State<HomeScreen> {
       onPressed: () async {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.clear();
-        print("mobileNoVerification");
-        print(mobileNoVerification);
         Navigator.pushNamedAndRemoveUntil(
-            context, '/LoginScreen', (route) => false);
+            context, '/LangSelection', (route) => false);
       },
     );
     AlertDialog alert = AlertDialog(
@@ -176,9 +215,20 @@ class _HomeScreenState extends State<HomeScreen> {
           pr.hide();
           if (data.length > 0) {
             GetAllMandiData = data;
-            for(int i=0;i<GetAllMandiData.length;i++) {
-              if(!GetAllMandiDataCopy.contains(GetAllMandiData[i]["mandiname"])) {
-                GetAllMandiDataCopy.add(GetAllMandiData[i]["mandiname"]);
+            if(language=="Marathi"){
+              for(int i=0;i<GetAllMandiData.length;i++) {
+                if(!GetAllMandiDataCopy.contains(GetAllMandiData[i]["MandiMarathiName"].toString())) {
+                  GetAllMandiDataCopy.add(GetAllMandiData[i]["MandiMarathiName"].toString().replaceAll(".csv",""));
+                }
+              }
+            }
+            else {
+              for (int i = 0; i < GetAllMandiData.length; i++) {
+                if (!GetAllMandiDataCopy.contains(
+                    GetAllMandiData[i]["MandiName"].toString())) {
+                  GetAllMandiDataCopy.add(
+                      GetAllMandiData[i]["MandiName"].toString().replaceAll(".csv", ""));
+                }
               }
             }
             setState(() {
@@ -187,6 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
             });
           } else {
           }
+          getAllCompanies();
         }, onError: (e) {
           showMsg("Try Again.");
         });
@@ -202,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  getMandiProducts(String selectedMandiId) async {
+  getMandiProducts(String selectedMandiId,String language) async {
     try {
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
@@ -210,7 +261,6 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           isLoading = true;
         });
-        print(selectMandi);
         GetMandiData.clear();
         var body = {
           "mandiId" :selectedMandiId,
@@ -222,7 +272,6 @@ class _HomeScreenState extends State<HomeScreen> {
               isLoading = false;
               GetMandiData = data;
             });
-            getMandiFomrPythonApi(selectMandi);
             getUserLocation();
           } else {
             showMsg("");
@@ -242,6 +291,45 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // getCompanyProducts(String selectedcompanyid,String language) async {
+  //   try {
+  //     final result = await InternetAddress.lookup('google.com');
+  //     if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+  //       pr.show();
+  //       setState(() {
+  //         isLoading = true;
+  //       });
+  //       print(selectMandi);
+  //       GetMandiData.clear();
+  //       var body = {
+  //         "mandiId" :selectedMandiId,
+  //       };
+  //       Services.getMandiProducts(body).then((data) async {
+  //         pr.hide();
+  //         if (data.length > 0) {
+  //           setState(() {
+  //             isLoading = false;
+  //             GetMandiData = data;
+  //           });
+  //           getUserLocation();
+  //         } else {
+  //           showMsg("");
+  //         }
+  //       }, onError: (e) {
+  //         showMsg("Try Again.");
+  //       });
+  //     } else {
+  //       setState(() {
+  //         isLoading = false;
+  //       });
+  //       pr.hide();
+  //       showMsg("No Internet Connection.");
+  //     }
+  //   } on SocketException catch (_) {
+  //     showMsg("No Internet Connection.");
+  //   }
+  // }
+
   getMandiFomrPythonApi(String selectedMandi) async {
     try {
       final result = await InternetAddress.lookup('google.com');
@@ -250,9 +338,7 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           isLoading = true;
         });
-        print(selectMandi);
         Services.getMandiProductsFromPythonApi(selectedMandi).then((data) async {
-          // pr.hide();
           if (data.length > 0) {
             setState(() {
               isLoading = false;
@@ -290,8 +376,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(GetMandiData.length);
-    print(GetDataFromPythonApi.length);
+    for(int i=0;i<GetMandiData.length;i++){
+      if(GetMandiData[i]["yesterDayHigh"]==null ||
+          GetMandiData[i]["productId"]==null){
+        GetMandiData.remove(GetMandiData[i]);
+      }
+    }
+    print(GetMandiData);
     return Scaffold(
       drawer: Drawer(
         child: Column(
@@ -317,7 +408,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 85.0, left: 10),
-                    child: Text(
+                    child: language=="Marathi" ?
+                    Text(
+                      "शोधण्यासाठी टाइप करा",
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontFamily: 'Quick',
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ):Text(
                       BaseLang.getTypeToSearch(),
                       style: TextStyle(
                         fontSize: 20.0,
@@ -332,10 +432,17 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ListTile(
               onTap: () {
-                print("Track Sells");
+                print("Track Sales");
               },
-              title: Text(
-                'Track Sells',
+              title: language=="Marathi" ?
+              Text(
+                'ट्रॅक विक्री',
+                style: TextStyle(
+                    fontFamily: 'Quick',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 19),
+              ):Text(
+                'Track Sales',
                 style: TextStyle(
                     fontFamily: 'Quick',
                     fontWeight: FontWeight.w500,
@@ -350,8 +457,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               onTap: () {
                 print("Sell History");
+                Navigator.of(context).pushReplacementNamed('/SalesHistoryScreen');
               },
-              title: Text(
+              title: language=="Marathi" ? Text(
+                'इतिहास विक्री करा',
+                style: TextStyle(
+                    fontFamily: 'Quick',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 19),
+              ):
+              Text(
                 'Sell History',
                 style: TextStyle(
                     fontFamily: 'Quick',
@@ -368,7 +483,14 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () {
                 print("Help Question");
               },
-              title: Text(
+              title: language=="Marathi" ?
+              Text(
+                'आधार',
+                style: TextStyle(
+                    fontFamily: 'Quick',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 19),
+              ):Text(
                 'Support',
                 style: TextStyle(
                     fontFamily: 'Quick',
@@ -388,7 +510,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   _showAlertDialog(context);
                   print("Logout");
                 },
-                title: Text(
+                title: language=="Marathi" ?
+                Text(
+                  'बाहेर पडणे',
+                  style: TextStyle(
+                      fontFamily: 'Quick',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 19),
+                ):Text(
                   'Logout',
                   style: TextStyle(
                       fontFamily: 'Quick',
@@ -419,253 +548,465 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           iconTheme: IconThemeData(color: Colors.white)),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 15.0, right: 15),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Padding(
-            //   padding: const EdgeInsets.only(top: 15, left: 5),
-            //   child: Text(
-            //     "Area to be searched",
-            //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            //   ),
-            // ),
-            // SliderTheme(
-            //   data: SliderTheme.of(context).copyWith(
-            //     activeTrackColor: Colors.red[700],
-            //     inactiveTrackColor: Colors.red[100],
-            //     trackShape: RoundedRectSliderTrackShape(),
-            //     trackHeight: 4.0,
-            //     thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
-            //     thumbColor: Colors.redAccent,
-            //     overlayColor: Colors.red.withAlpha(32),
-            //     overlayShape: RoundSliderOverlayShape(overlayRadius: 28.0),
-            //     tickMarkShape: RoundSliderTickMarkShape(),
-            //     activeTickMarkColor: Colors.red[700],
-            //     inactiveTickMarkColor: Colors.red[100],
-            //     valueIndicatorShape: PaddleSliderValueIndicatorShape(),
-            //     valueIndicatorColor: Colors.redAccent,
-            //     valueIndicatorTextStyle: TextStyle(
-            //       color: Colors.white,
-            //     ),
-            //   ),
-            //   child: Slider(
-            //     value: _value,
-            //     min: 0,
-            //     max: 30,
-            //     divisions: 10,
-            //     label: '$_value' + 'km',
-            //     onChangeEnd: (value){
-            //       dropDownMandiData.clear();
-            //       GetMandiData.clear();
-            //       print("_value");
-            //       print(_value);
-            //       getNearMandi();
-            //     },
-            //     onChanged: (value) {
-            //       print(value.runtimeType);
-            //       setState(
-            //         () {
-            //           _value = value;
-            //         },
-            //       );
-            //     },
-            //   ),
-            // ),
-            SIZE_HEIGHT_LOW,
-            // Center(
-            //   child: RaisedButton(
-            //       child: Text(
-            //         "Search",
-            //         style: TextStyle(
-            //           fontFamily: 'Quick',
-            //           color: Colors.white,
-            //         ),
-            //       ),
-            //       color: COLOR.primaryColor,
-            //       onPressed: () {
-            //
-            //       }),
-            // ),
-            Padding(
-              padding: const EdgeInsets.only(top: 5.0, left: 6, right: 41),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(
-                    color: COLOR.primaryColor,
-                    style: BorderStyle.solid,
-                    width: 0.80,
-                  ),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 2.0),
-                    child: DropdownButton<dynamic>(
-                      dropdownColor: Colors.white,
-                      hint: Text("Select Mandi"),
-                      icon: Icon(
-                        Icons.arrow_drop_down,
-                        size: 40,
-                        color: COLOR.primaryColor,
-                      ),
-                      isExpanded: true,
-                      value: selectMandi,
-                      onChanged: (newvalue) {
-                        print("tapped");
-                        String selectedmandiId="";
-                        setState(() {
-                          selectMandi = newvalue;
-                        });
-                        for(int i=0;i<GetAllMandiData.length;i++){
-                          if(GetAllMandiData[i]["mandiname"]==selectMandi){
-                            selectedmandiId = GetAllMandiData[i]["id"];
-                            break;
-                          }
-                        }
-                        print("selectedmandiid");
-                        print(selectedmandiId);
-                        getMandiProducts(selectedmandiId);
-                      },
-                      items: GetAllMandiDataCopy.map(
-                        (Location) {
-                          return DropdownMenuItem(
-                            child: Text(Location),
-                            value: Location,
-                          );
-                        },
-                      ).toList(),
+      body:
+        DefaultTabController(
+          length: 2,
+          child: Column(
+            children: [
+              Container(
+                color: Colors.white,
+                height: 5,
+              ),
+              Material(
+                color: Colors.white,
+                child: TabBar(
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.black,
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    indicator: new BubbleTabIndicator(
+                      indicatorHeight: 43,
+                      indicatorRadius: 6,
+                      indicatorColor: COLOR.primaryColor,
+                      tabBarIndicatorSize: TabBarIndicatorSize.tab,
                     ),
-                  ),
-                ),
+                    tabs: [
+                      language == "Marathi"
+                          ? Tab(
+                        child: Text(
+                          "मंडई पिके",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      )
+                          : Tab(
+                        child: Text(
+                          "Mandi Crops",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                      language == "Marathi"
+                          ? Tab(
+                          child: Text("कंपनी पिके",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 16)))
+                          : Tab(
+                          child: Text("Company Crops",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16))),
+                    ]),
               ),
-            ),
-            // Padding(
-            //   padding: const EdgeInsets.only(left: 6.0, right: 6),
-            //   child: TextField(
-            //     decoration: InputDecoration(
-            //       isDense: true,
-            //       labelText: "My Location",
-            //       labelStyle:
-            //           TextStyle(fontFamily: "Quick", color: COLOR.primaryColor),
-            //       contentPadding: EdgeInsets.all(12.0),
-            //       enabledBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.all(Radius.circular(4.0)),
-            //         borderSide: BorderSide(color: Colors.grey),
-            //       ),
-            //       focusedBorder: OutlineInputBorder(
-            //         borderRadius: BorderRadius.all(Radius.circular(4.0)),
-            //         borderSide: BorderSide(color: Colors.grey),
-            //       ),
-            //     ),
-            //     controller: edtLocationController,
-            //   ),
-            // ),
-            // Container(
-            //   padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-            //   child: Padding(
-            //     padding: const EdgeInsets.only(top: 12.0),
-            //     child: Row(
-            //       children: [
-            //         Expanded(
-            //           child: TextField(
-            //             keyboardType: TextInputType.text,
-            //             enabled: true,
-            //             decoration: InputDecoration(
-            //               isDense: true,
-            //               labelText: BaseLang.getTypeToSearch(),
-            //               labelStyle: TextStyle(
-            //                   fontFamily: "Quick", color: Colors.black45),
-            //               contentPadding: EdgeInsets.all(12.0),
-            //               enabledBorder: OutlineInputBorder(
-            //                 borderRadius:
-            //                     BorderRadius.all(Radius.circular(4.0)),
-            //                 borderSide: BorderSide(color: Color(0xCCF07544)),
-            //               ),
-            //               focusedBorder: OutlineInputBorder(
-            //                 borderRadius:
-            //                     BorderRadius.all(Radius.circular(4.0)),
-            //                 borderSide: BorderSide(color: Color(0xCCF07544)),
-            //               ),
-            //             ),
-            //             onChanged: (value) {
-            //               print(value);
-            //               getFilteredData(value);
-            //             },
-            //           ),
-            //         ),
-            //         Padding(
-            //           padding: const EdgeInsets.only(left: 5),
-            //           child: InkWell(
-            //             child: Image.asset(
-            //               'assets/images/search.png',
-            //               width: 30,
-            //               height: 25,
-            //             ),
-            //           ),
-            //         )
-            //       ],
-            //     ),
-            //   ),
-            // ),
-             selectMandi==null && GetAllMandiData.length>0
-                ? Padding(
-              padding: const EdgeInsets.only(top: 100.0),
-              child: Center(
-                child: Text(
-                  "Please Select Mandi",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            )
-                :  GetMandiData.length==0 || GetDataFromPythonApi.length==0
-                ? Padding(
-              padding: const EdgeInsets.only(top: 100.0),
-              child: Center(
-                child: Text(
-                  "No Data Found",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            )
-                : Expanded(
-                    child: Padding(
-                    padding: const EdgeInsets.only(top: 15.0),
-                    child: ListView.builder(
-                        itemCount: GetMandiData.length,
-                        itemBuilder: (context, index) {
-                          return InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PriceScreen(
-                                    GetMandiData: GetMandiData[index],
-                                    Image:GetDataFromPythonApi[index]["CropImage"],
-                                    CropName:GetDataFromPythonApi[index]["CropName"],
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15.0, right: 15),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Padding(
+                          //   padding: const EdgeInsets.only(top: 15, left: 5),
+                          //   child: Text(
+                          //     "Area to be searched",
+                          //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                          //   ),
+                          // ),
+                          // SliderTheme(
+                          //   data: SliderTheme.of(context).copyWith(
+                          //     activeTrackColor: Colors.red[700],
+                          //     inactiveTrackColor: Colors.red[100],
+                          //     trackShape: RoundedRectSliderTrackShape(),
+                          //     trackHeight: 4.0,
+                          //     thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
+                          //     thumbColor: Colors.redAccent,
+                          //     overlayColor: Colors.red.withAlpha(32),
+                          //     overlayShape: RoundSliderOverlayShape(overlayRadius: 28.0),
+                          //     tickMarkShape: RoundSliderTickMarkShape(),
+                          //     activeTickMarkColor: Colors.red[700],
+                          //     inactiveTickMarkColor: Colors.red[100],
+                          //     valueIndicatorShape: PaddleSliderValueIndicatorShape(),
+                          //     valueIndicatorColor: Colors.redAccent,
+                          //     valueIndicatorTextStyle: TextStyle(
+                          //       color: Colors.white,
+                          //     ),
+                          //   ),
+                          //   child: Slider(
+                          //     value: _value,
+                          //     min: 0,
+                          //     max: 30,
+                          //     divisions: 10,
+                          //     label: '$_value' + 'km',
+                          //     onChangeEnd: (value){
+                          //       dropDownMandiData.clear();
+                          //       GetMandiData.clear();
+                          //       print("_value");
+                          //       print(_value);
+                          //       getNearMandi();
+                          //     },
+                          //     onChanged: (value) {
+                          //       print(value.runtimeType);
+                          //       setState(
+                          //         () {
+                          //           _value = value;
+                          //         },
+                          //       );
+                          //     },
+                          //   ),
+                          // ),
+                          SIZE_HEIGHT_LOW,
+                          // Center(
+                          //   child: RaisedButton(
+                          //       child: Text(
+                          //         "Search",
+                          //         style: TextStyle(
+                          //           fontFamily: 'Quick',
+                          //           color: Colors.white,
+                          //         ),
+                          //       ),
+                          //       color: COLOR.primaryColor,
+                          //       onPressed: () {
+                          //
+                          //       }),
+                          // ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5.0, left: 6, right: 5),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8.0),
+                                border: Border.all(
+                                  color: COLOR.primaryColor,
+                                  style: BorderStyle.solid,
+                                  width: 0.80,
+                                ),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 2.0),
+                                  child: DropdownButton<dynamic>(
+                                    dropdownColor: Colors.white,
+                                    hint: language=="Marathi" ?
+                                    Text("मंडी निवडा") : Text("Select Mandi"),
+                                    icon: Icon(
+                                      Icons.arrow_drop_down,
+                                      size: 40,
+                                      color: COLOR.primaryColor,
+                                    ),
+                                    isExpanded: true,
+                                    value: selectMandi,
+                                    onChanged: (newvalue) {
+                                      String selectedmandiId="";
+                                      setState(() {
+                                        selectMandi = newvalue;
+                                      });
+                                      if(language=="Marathi"){
+                                        for(int i=0;i<GetAllMandiData.length;i++){
+                                          if(GetAllMandiData[i]["MandiMarathiName"]==selectMandi){
+                                            print(GetAllMandiData[i]);
+                                            selectedmandiId = GetAllMandiData[i]["_id"];
+                                            break;
+                                          }
+                                        }
+                                      }
+                                      else{
+                                        for(int i=0;i<GetAllMandiData.length;i++){
+                                          if(GetAllMandiData[i]["MandiName"]==selectMandi){
+                                            print(GetAllMandiData[i]);
+                                            selectedmandiId = GetAllMandiData[i]["_id"];
+                                            break;
+                                          }
+                                        }
+                                      }
+                                      getMandiProducts(selectedmandiId,language);
+                                    },
+                                    items: GetAllMandiDataCopy.map(
+                                      (Location) {
+                                        return DropdownMenuItem(
+                                          child: Text(Location),
+                                          value: Location,
+                                        );
+                                      },
+                                    ).toList(),
                                   ),
                                 ),
-                              );
-                            },
-                            child: ProductComponent(
-                              GetAllProductsData: GetMandiData[index],
-                              Image:GetDataFromPythonApi[index]["CropImage"],
-                              // ["productId"],
+                              ),
                             ),
-                          );
-                        }),
-                  ))
-          ],
+                          ),
+                          // Padding(
+                          //   padding: const EdgeInsets.only(left: 6.0, right: 6),
+                          //   child: TextField(
+                          //     decoration: InputDecoration(
+                          //       isDense: true,
+                          //       labelText: "My Location",
+                          //       labelStyle:
+                          //           TextStyle(fontFamily: "Quick", color: COLOR.primaryColor),
+                          //       contentPadding: EdgeInsets.all(12.0),
+                          //       enabledBorder: OutlineInputBorder(
+                          //         borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                          //         borderSide: BorderSide(color: Colors.grey),
+                          //       ),
+                          //       focusedBorder: OutlineInputBorder(
+                          //         borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                          //         borderSide: BorderSide(color: Colors.grey),
+                          //       ),
+                          //     ),
+                          //     controller: edtLocationController,
+                          //   ),
+                          // ),
+                          // Container(
+                          //   padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                          //   child: Padding(
+                          //     padding: const EdgeInsets.only(top: 12.0),
+                          //     child: Row(
+                          //       children: [
+                          //         Expanded(
+                          //           child: TextField(
+                          //             keyboardType: TextInputType.text,
+                          //             enabled: true,
+                          //             decoration: InputDecoration(
+                          //               isDense: true,
+                          //               labelText: BaseLang.getTypeToSearch(),
+                          //               labelStyle: TextStyle(
+                          //                   fontFamily: "Quick", color: Colors.black45),
+                          //               contentPadding: EdgeInsets.all(12.0),
+                          //               enabledBorder: OutlineInputBorder(
+                          //                 borderRadius:
+                          //                     BorderRadius.all(Radius.circular(4.0)),
+                          //                 borderSide: BorderSide(color: Color(0xCCF07544)),
+                          //               ),
+                          //               focusedBorder: OutlineInputBorder(
+                          //                 borderRadius:
+                          //                     BorderRadius.all(Radius.circular(4.0)),
+                          //                 borderSide: BorderSide(color: Color(0xCCF07544)),
+                          //               ),
+                          //             ),
+                          //             onChanged: (value) {
+                          //               print(value);
+                          //               getFilteredData(value);
+                          //             },
+                          //           ),
+                          //         ),
+                          //         Padding(
+                          //           padding: const EdgeInsets.only(left: 5),
+                          //           child: InkWell(
+                          //             child: Image.asset(
+                          //               'assets/images/search.png',
+                          //               width: 30,
+                          //               height: 25,
+                          //             ),
+                          //           ),
+                          //         )
+                          //       ],
+                          //     ),
+                          //   ),
+                          // ),
+                           selectMandi==null && GetAllMandiData.length>0
+                              ? Padding(
+                            padding: const EdgeInsets.only(top: 120.0),
+                            child: Center(
+                              child: language=="Marathi" ? Text(
+                                "कृपया मंडी निवडा",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ):Text(
+                                "Please select Mandi",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                          )
+                              :  GetMandiData.length==0
+                              ? Padding(
+                            padding: const EdgeInsets.only(top: 100.0),
+                            child: Center(
+                              child: language=="Marathi" ? Text(
+                                "माहिती आढळली नाही",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ):Text(
+                                "No Data Found",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                          )
+                              : Expanded(
+                                  child: Padding(
+                                  padding: const EdgeInsets.only(top: 15.0),
+                                  child: ListView.builder(
+                                      itemCount: GetMandiData.length,
+                                      itemBuilder: (context, index) {
+                                        return InkWell(
+                                          onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      PriceScreen(
+                                                          GetMandiData: GetMandiData[index],
+                                                          language: language
+                                                      ),
+                                                ),
+                                              );
+                                          },
+                                          child: ProductComponent(
+                                            GetAllProductsData: GetMandiData[index],
+                                            language:language
+                                            // ["productId"],
+                                          ),
+                                        );
+                                      }),
+                                ))
+                        ],
+                      ),
+                    ),
+                    Center(
+                      child: language=="Marathi" ?
+                      Text("लवकरच येत आहे"):Text("Coming Soon!!!"),
+                    ),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(left: 15.0, right: 15),
+                    //   child: Column(
+                    //     mainAxisAlignment: MainAxisAlignment.start,
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     children: [
+                    //       SIZE_HEIGHT_LOW,
+                    //       Padding(
+                    //         padding: const EdgeInsets.only(top: 5.0, left: 6, right: 5),
+                    //         child: Container(
+                    //           decoration: BoxDecoration(
+                    //             borderRadius: BorderRadius.circular(8.0),
+                    //             border: Border.all(
+                    //               color: COLOR.primaryColor,
+                    //               style: BorderStyle.solid,
+                    //               width: 0.80,
+                    //             ),
+                    //           ),
+                    //           child: DropdownButtonHideUnderline(
+                    //             child: Padding(
+                    //               padding: const EdgeInsets.only(left: 2.0),
+                    //               child: DropdownButton<dynamic>(
+                    //                 dropdownColor: Colors.white,
+                    //                 hint: language=="Marathi" ?
+                    //                 Text("कंपनी निवडा") : Text("Select Company"),
+                    //                 icon: Icon(
+                    //                   Icons.arrow_drop_down,
+                    //                   size: 40,
+                    //                   color: COLOR.primaryColor,
+                    //                 ),
+                    //                 isExpanded: true,
+                    //                 value: selectcompany,
+                    //                 onChanged: (newvalue) {
+                    //                   print("tapped");
+                    //                   String selectedcompanyid="";
+                    //                   setState(() {
+                    //                     selectcompany = newvalue;
+                    //                   });
+                    //                     for(int i=0;i<companiesdata.length;i++){
+                    //                       if(companiesdata[i]["companyName"]==selectcompany){
+                    //                         selectedcompany.add(companiesdata[i]);
+                    //                         break;
+                    //                       }
+                    //                     }
+                    //                   print("selectedcompanyid");
+                    //                   print(selectedcompanyid);
+                    //                   // getCompanyProducts(selectedcompanyid,widget.language);
+                    //                 },
+                    //                 items: GetAllMandiDataCopy.map(
+                    //                   (Location) {
+                    //                     return DropdownMenuItem(
+                    //                       child: Text(Location),
+                    //                       value: Location,
+                    //                     );
+                    //                   },
+                    //                 ).toList(),
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ),
+                    //        selectedcompany==null && companiesdata.length>0
+                    //           ? Padding(
+                    //         padding: const EdgeInsets.only(top: 120.0),
+                    //         child: Center(
+                    //           child: language=="Marathi" ? Text(
+                    //             "कृपया कंपनी निवडा",
+                    //             style: TextStyle(
+                    //               fontWeight: FontWeight.bold,
+                    //               fontSize: 15,
+                    //             ),
+                    //           ):Text(
+                    //             "Please select Company",
+                    //             style: TextStyle(
+                    //               fontWeight: FontWeight.bold,
+                    //               fontSize: 15,
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       )
+                    //           :  companiesdata.length==0
+                    //           ? Padding(
+                    //         padding: const EdgeInsets.only(top: 100.0),
+                    //         child: Center(
+                    //           child: language=="Marathi" ? Text(
+                    //             "कृपया कंपनी निवडा",
+                    //             style: TextStyle(
+                    //               fontWeight: FontWeight.bold,
+                    //               fontSize: 15,
+                    //             ),
+                    //           ):Text(
+                    //             "Please select Company",
+                    //             style: TextStyle(
+                    //               fontWeight: FontWeight.bold,
+                    //               fontSize: 15,
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       )
+                    //           : Expanded(
+                    //               child: Padding(
+                    //               padding: const EdgeInsets.only(top: 15.0),
+                    //               child: ListView.builder(
+                    //                   itemCount: selectedcompany.length,
+                    //                   itemBuilder: (context, index) {
+                    //                     return InkWell(
+                    //                       onTap: () {
+                    //                         Navigator.push(
+                    //                           context,
+                    //                           MaterialPageRoute(
+                    //                             builder: (context) => PriceScreen(
+                    //                               GetMandiData: GetMandiData[index],
+                    //                               language:language
+                    //                             ),
+                    //                           ),
+                    //                         );
+                    //                       },
+                    //                       child: ProductComponent(
+                    //                         GetAllProductsData: selectedcompany[index],
+                    //                         language:language
+                    //                         // ["productId"],
+                    //                       ),
+                    //                     );
+                    //                   }),
+                    //             ))
+                    //     ],
+                    //   ),
+                    // ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
     );
   }
 

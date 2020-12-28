@@ -1,9 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class ProductComponent extends StatefulWidget {
   Map GetAllProductsData ;
-  String Image;
-  ProductComponent({this.GetAllProductsData,this.Image});
+  String language="";
+  ProductComponent({this.GetAllProductsData,this.language});
   @override
   _ProductComponentState createState() => _ProductComponentState();
 }
@@ -33,16 +35,24 @@ class _ProductComponentState extends State<ProductComponent> {
                 padding: const EdgeInsets.all(8.0),
                 child: SizedBox(
                   // width: 90,
-                  height: 90,
-                  child: Image.network("${widget.Image}",
-                    height: 100,
-                    width: 100,
-                  ),
+                  height: 80,
+                    child:
+                    widget.GetAllProductsData["productId"]!=null ? Image.network(
+                      "http://13.234.119.95/" +
+                        "${widget.GetAllProductsData["productId"]["productImage"]}",
+                    width: 80,
+                      height: 80,
+                    ):Container(),
                 ),
               ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
+                  widget.language=="Marathi" ?
+                  Text(
+                    "${widget.GetAllProductsData["productId"]["productMarathiName"]}",
+                    style: TextStyle(fontFamily: 'Quick', fontSize: 22),
+                  ):
                   Text(
                     "${widget.GetAllProductsData["productId"]["productName"]}",
                     style: TextStyle(fontFamily: 'Quick', fontSize: 22),
@@ -59,7 +69,12 @@ class _ProductComponentState extends State<ProductComponent> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(top: 3.0),
-                            child: Text(
+                            child: widget.language=="Marathi" ? Text(
+                              'काल',
+                              style: TextStyle(
+                                fontSize: 13,
+                              ),
+                            ):Text(
                               'Yesterday',
                               style: TextStyle(
                                 fontSize: 13,
@@ -68,8 +83,10 @@ class _ProductComponentState extends State<ProductComponent> {
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 3.0),
-                            child: Text(
-                              "${widget.GetAllProductsData["yesterDayHigh"]}"+'₹/Kg',
+                            child: widget.language=="Marathi" ? Text(
+                              "${widget.GetAllProductsData["yesterDayHigh"]}"+'₹/क्विंटल',
+                            ):Text(
+                              "${widget.GetAllProductsData["yesterDayHigh"]}"+'₹/Quintal',
                             ),
                           ),
                         ],
@@ -87,7 +104,12 @@ class _ProductComponentState extends State<ProductComponent> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(top: 5.0),
-                            child: Text(
+                            child: widget.language=="Marathi" ? Text(
+                              'आज',
+                              style: TextStyle(
+                                fontSize: 13,
+                              ),
+                            ):Text(
                               'Today',
                               style: TextStyle(
                                 fontSize: 13,
@@ -96,12 +118,18 @@ class _ProductComponentState extends State<ProductComponent> {
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 1.0, left: 3),
-                            child: Text(
-                              "${widget.GetAllProductsData["highestPrice"]}"+'₹/Kg',
+                            child: widget.language=="Marathi" ? Text(
+                              "${widget.GetAllProductsData["highestPrice"]}"+'₹/क्विंटल',
                               style: TextStyle(
                                   fontFamily: 'Quick',
                                   fontSize: 15,
-                                  fontWeight: FontWeight.w600),
+                                  ),
+                            ): Text(
+                              "${widget.GetAllProductsData["highestPrice"]}"+'₹/Quintal',
+                              style: TextStyle(
+                                  fontFamily: 'Quick',
+                                  fontSize: 15,
+                                 ),
                             ),
                           ),
                         ],
@@ -110,14 +138,14 @@ class _ProductComponentState extends State<ProductComponent> {
                   )
                 ],
               ),
-              widget.GetAllProductsData["highestPrice"] >
+              widget.GetAllProductsData["yesterDayHigh"]!=null ? widget.GetAllProductsData["highestPrice"] >
                   widget.GetAllProductsData["yesterDayHigh"] ? Padding(
                 padding: const EdgeInsets.only(right: 15.0),
                 child: Image.asset('assets/images/arrow_up.png'),
               ):Padding(
                 padding: const EdgeInsets.only(right: 15.0),
                 child: Image.asset('assets/images/arrow_down.png'),
-              ),
+              ):Container(),
               //TODO show up-down key
             ],
           ),

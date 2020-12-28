@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
+  LoginScreen();
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -86,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   startPhoneAuth() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString(mobileNumber, edtMobileController.text);
+    sharedPreferences.setString(mobilenumber, edtMobileController.text);
     final phoneAuthDataProvider =
         Provider.of<PhoneAuthDataProvider>(context, listen: false);
     phoneAuthDataProvider.loading = true;
@@ -97,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
           print("startedphoneauth");
           Navigator.of(context).pushReplacement(CupertinoPageRoute(
               builder: (BuildContext context) =>
-                  PhoneAuthVerify(register: true)));
+                  PhoneAuthVerify(register: true,)));
         },
         onFailed: () {
           _showSnackBar(phoneAuthDataProvider.message);
@@ -134,13 +135,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 break;
               }
             }
-            if (userfound) {
-              print("yes user found");
-              startPhoneAuth();
-            } else {
-              showMsg(
-                  "This mobile number is not registerd please register first");
-            }
+          }
+          if (userfound) {
+            print("yes user found");
+            startPhoneAuth();
+          } else {
+            showMsg(
+                "This mobile number is not registerd please register first");
           }
         }, onError: (e) {
           pr.hide();

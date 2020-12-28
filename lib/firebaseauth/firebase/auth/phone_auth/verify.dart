@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bhaav/Common/Services.dart';
 import 'package:bhaav/Common/constants.dart';
+import 'package:bhaav/Screens/homeScreen.dart';
 import 'package:bhaav/firebaseauth/providers/phone_auth.dart';
 import 'package:bhaav/firebaseauth/utils/constants.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +43,6 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
 
   @override
   void initState() {
-    print("widget.registr");
     print(widget.register);
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
     pr.style(
@@ -186,24 +186,6 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
           ),
 
           SizedBox(height: 16.0),
-
-          // Row(
-          //   mainAxisSize: MainAxisSize.min,
-          //   children: <Widget>[
-          //     getPinField(key: "1", focusNode: focusNode1),
-          //     SizedBox(width: 5.0),
-          //     getPinField(key: "2", focusNode: focusNode2),
-          //     SizedBox(width: 5.0),
-          //     getPinField(key: "3", focusNode: focusNode3),
-          //     SizedBox(width: 5.0),
-          //     getPinField(key: "4", focusNode: focusNode4),
-          //     SizedBox(width: 5.0),
-          //     getPinField(key: "5", focusNode: focusNode5),
-          //     SizedBox(width: 5.0),
-          //     getPinField(key: "6", focusNode: focusNode6),
-          //     SizedBox(width: 5.0),
-          //   ],
-          // ),
           PinCodeTextField(
             appContext: context,
             pastedTextStyle: TextStyle(
@@ -298,16 +280,6 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
           keyboardType: TextInputType.number,
           style: TextStyle(
               fontSize: 20.0, fontWeight: FontWeight.w600, color: Colors.black),
-//          decoration: InputDecoration(
-//              contentPadding: const EdgeInsets.only(
-//                  bottom: 10.0, top: 10.0, left: 4.0, right: 4.0),
-//              focusedBorder: OutlineInputBorder(
-//                  borderRadius: BorderRadius.circular(5.0),
-//                  borderSide:
-//                      BorderSide(color: Colors.blueAccent, width: 2.25)),
-//              border: OutlineInputBorder(
-//                  borderRadius: BorderRadius.circular(5.0),
-//                  borderSide: BorderSide(color: Colors.white))),
         ),
       );
 
@@ -368,17 +340,17 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
         };
         Services.LoginUser(data).then((data) async {
           pr.hide();
-          print("response from loginUser function");
+          SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
+          print("response from login User function");
           print(data);
           if (data != 0) {
             pr.hide();
-            // Fluttertoast.showToast(
-            //     msg: "User Logged In Successfully",
-            //     backgroundColor: Colors.red,
-            //     gravity: ToastGravity.TOP,
-            //     toastLength: Toast.LENGTH_SHORT);
-            Navigator.pushNamedAndRemoveUntil(
-                context, '/HomeScreen', (route) => false);
+            print("farmerid from data");
+            print(data[0]["_id"]);
+            sharedPreferences.setString(FarmerId, data[0]["_id"].toString());
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => HomeScreen()));
           } else {
             pr.hide();
             showMsg("${data}");
@@ -399,37 +371,6 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
     }
   }
 
-  void saveData(
-    String id,
-    String name,
-    String email,
-    String gender,
-    String dob,
-    String countryid,
-    String stateid,
-    String city,
-    String schoolName,
-    String schoolLocation,
-    String selectAffilatedWith,
-    String affilatedNumber,
-    // String whatsappNumber,
-    String personalNumber,
-  ) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString('_id', id);
-    sharedPreferences.setString('name', name);
-    sharedPreferences.setString('email', email);
-    sharedPreferences.setString('dob', dob);
-    sharedPreferences.setString('countryid', countryid);
-    sharedPreferences.setString('stateid', stateid);
-    sharedPreferences.setString('city', city);
-    sharedPreferences.setString('schoolName', schoolName);
-    sharedPreferences.setString('schoolAddress', schoolLocation);
-    sharedPreferences.setString('selectAffilatedWith', selectAffilatedWith);
-    sharedPreferences.setString('affilatedNumber', affilatedNumber);
-    // sharedPreferences.setString('whatsappNumber', whatsappNumber);
-    sharedPreferences.setString('personalNumber', personalNumber);
-  }
 
   RegisterUser(String mobileNumber) async {
     try {
@@ -444,13 +385,13 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
             await SharedPreferences.getInstance();
         print("request data to registerUser function");
         print(sharedPreferences.getString(Nameonsignup));
-        print(sharedPreferences.getString(mobileNumber));
+        print(sharedPreferences.getString(mobilenumber));
         print(sharedPreferences.getString(Landsizeownedonsignup));
         print(sharedPreferences.getString(StateonIdsignup));
 
         var data = {
           "name": sharedPreferences.getString(Nameonsignup),
-          "mobile": sharedPreferences.getString(mobileNumber),
+          "mobile": sharedPreferences.getString(mobilenumber),
           "lat": sharedPreferences.getDouble(Latitude.toString()),
           "long": sharedPreferences.getDouble(Longitude.toString()),
           "completeAddress": sharedPreferences.getString(Locationonsignup),
@@ -462,8 +403,6 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
         Services.RegisterUser(data).then((data) async {
           pr.hide();
           if (data.IsSuccess == true) {
-            print("response data from registerUser function");
-            print(data);
             sharedPreferences.setString(FarmerId, data.Data["_id"]);
             pr.hide();
             Fluttertoast.showToast(
@@ -471,8 +410,11 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
                 backgroundColor: Colors.red,
                 gravity: ToastGravity.TOP,
                 toastLength: Toast.LENGTH_SHORT);
-            Navigator.pushNamedAndRemoveUntil(
-                context, '/HomeScreen', (route) => false);
+            // Navigator.pushNamedAndRemoveUntil(
+            //     context, '/HomeScreen', (route) => false);
+            Navigator.push(context,
+            MaterialPageRoute(builder: (context) => HomeScreen())
+            );
           } else {
             pr.hide();
             showMsg(data.Message);
@@ -498,12 +440,12 @@ class _PhoneAuthVerifyState extends State<PhoneAuthVerify> {
     _showSnackBar(
         "${Provider.of<PhoneAuthDataProvider>(context, listen: false).message}");
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var mobilenumber = sharedPreferences.getString(mobileNumber);
-    sharedPreferences.setString(mobileNoVerification, mobilenumber);
-    if (widget.register == true) {
-      RegisterUser(mobilenumber);
+    var number = sharedPreferences.getString(mobilenumber);
+    sharedPreferences.setString(mobileNoVerification, number);
+    if (widget.register == false) {
+      RegisterUser(number);
     } else {
-      LoginUser(mobilenumber);
+      LoginUser(number);
     }
   }
 

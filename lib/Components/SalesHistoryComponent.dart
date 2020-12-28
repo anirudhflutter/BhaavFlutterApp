@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class SalesHistoryComponent extends StatefulWidget {
+  Map getFarmerSalesHistory = {};
+  SalesHistoryComponent({this.getFarmerSalesHistory});
   @override
   _SalesHistoryComponentState createState() => _SalesHistoryComponentState();
 }
@@ -29,7 +31,7 @@ class _SalesHistoryComponentState extends State<SalesHistoryComponent> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("ORD-0012"),
+                  Text("${widget.getFarmerSalesHistory["orderNo"]}"),
                   Text("16-OCT-2020"),
                 ],
               ),
@@ -50,7 +52,7 @@ class _SalesHistoryComponentState extends State<SalesHistoryComponent> {
                       ),
                     ),
                     Text(
-                      "Onion",
+                      "${widget.getFarmerSalesHistory["productId"]["productName"]}",
                       style: TextStyle(fontSize: 15),
                     ),
                   ],
@@ -84,7 +86,7 @@ class _SalesHistoryComponentState extends State<SalesHistoryComponent> {
                     Row(
                       children: [
                         Text(
-                          "Profit",
+                          "Income",
                           style: TextStyle(
                               fontWeight: FontWeight.w500, fontSize: 15),
                         ),
@@ -96,7 +98,7 @@ class _SalesHistoryComponentState extends State<SalesHistoryComponent> {
                           ),
                         ),
                         Text(
-                          "1500",
+                          "${widget.getFarmerSalesHistory["profit"]}",
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w500),
                         ),

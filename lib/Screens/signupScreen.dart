@@ -20,6 +20,7 @@ const kGoogleApiKey = "AIzaSyCm9L8-lLCSpRYME1D4lfMb4CS-oX1U6eQ";
 GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: kGoogleApiKey);
 
 class SignupScreen extends StatefulWidget {
+  SignupScreen();
   @override
   _SignupScreenState createState() => _SignupScreenState();
 }
@@ -41,12 +42,18 @@ class _SignupScreenState extends State<SignupScreen> {
   bool userfound = false;
   var Lat=0.0, Long=0.0;
   String _selectState,SelectedState="";
-  String _selectCity,SelectedCity="";
+  String _selectCity,SelectedCity="",language="";
   List<String> GetStatesData = [], GetCityData = [],GetStatesIdData=[],GetCityIdData=[];
+
+  GetLocalData() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    language = sharedPreferences.getString(languageselection);
+  }
 
   @override
   void initState() {
     GetStates();
+    GetLocalData();
     // GetCities();
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
     pr.style(
@@ -115,7 +122,7 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString(mobileNumber, edtMobileController.text.toString());
+    sharedPreferences.setString(mobilenumber, edtMobileController.text.toString());
     sharedPreferences.setString(Nameonsignup, edtNameController.text.toString());
     sharedPreferences.setString(Locationonsignup, edtLocationController.text.toString());
     sharedPreferences.setDouble(Latitude.toString(), Lat);
@@ -126,7 +133,7 @@ class _SignupScreenState extends State<SignupScreen> {
     sharedPreferences.setString(DistrictonIdsignup, cityid);
 
     print("data found");
-    print(mobileNumber);
+    print(mobilenumber);
     print(Nameonsignup);
     print(Landsizeownedonsignup);
     print(StateonIdsignup);
@@ -141,7 +148,7 @@ class _SignupScreenState extends State<SignupScreen> {
           print("startedphoneauth");
           Navigator.of(context).pushReplacement(CupertinoPageRoute(
               builder: (BuildContext context) =>
-                  PhoneAuthVerify(register: true)));
+                  PhoneAuthVerify(register: false)));
         },
         onFailed: () {
           _showSnackBar(phoneAuthDataProvider.message);
@@ -177,17 +184,17 @@ class _SignupScreenState extends State<SignupScreen> {
                 break;
               }
             }
-            if (userfound) {
-              showMsg("This mobile number is already registered please login");
-            } else {
-              print("user not found");
-              print(edtMobileController.text);
-              print(edtNameController.text);
-              print(edtLocationController.text);
-              print(edtLandSizeOwnedController.text);
+          }
+          if (userfound) {
+            showMsg("This mobile number is already registered please login");
+          } else {
+            print("user not found");
+            print(edtMobileController.text);
+            print(edtNameController.text);
+            print(edtLocationController.text);
+            print(edtLandSizeOwnedController.text);
 
-              startPhoneAuth();
-            }
+            startPhoneAuth();
           }
         }, onError: (e) {
           pr.hide();
@@ -260,7 +267,7 @@ class _SignupScreenState extends State<SignupScreen> {
       print("Current Location");
       Prediction p = await PlacesAutocomplete.show(
         context: context,
-        hint: "Search your location",
+        hint: language=="Marathi" ? "आपले स्थान शोधा" : "Search your location",
         apiKey: kGoogleApiKey,
         onError: onError,
         mode: Mode.overlay,
@@ -508,7 +515,11 @@ class _SignupScreenState extends State<SignupScreen> {
                                               getUserLocation();
                                               Navigator.of(context).pop(true);
                                             },
-                                            child: Text(
+                                            child: language=="Marathi" ? Text(
+                                              "सध्याचे स्थान मिळवा",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ):Text(
                                               "Get Current Location",
                                               style: TextStyle(
                                                   color: Colors.white),
@@ -522,7 +533,11 @@ class _SignupScreenState extends State<SignupScreen> {
                                             onPressed: () {
                                               searchPickLocation();
                                             },
-                                            child: Text(
+                                            child: language=="Marathi" ? Text(
+                                              "स्थान शोधा",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ):Text(
                                               "Find Location",
                                               style: TextStyle(
                                                   color: Colors.white),

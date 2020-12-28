@@ -84,11 +84,39 @@ class Services {
   }
 
 
-  static Future<List> getAllMandi() async {
-    String url = cnst.python_url + "getAllMandis";
+  static Future<List> getAllMandi({String language}) async {
+    String url = cnst.API_URL + "api/mandi/getAllMandi";
+    // String url = "http://192.168.29.54:5000/getAllMandis?language=$language";
     print("getAllMandis url : " + url);
     try {
-      final response = await dio.get(url);
+      final response = await dio.post(url);
+      print("response");
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        List list =[];
+        var memberDataClass = response.data;
+        if (memberDataClass["Data"] != 0) {
+          print(memberDataClass["Data"]);
+          list = memberDataClass["Data"];
+        } else {
+          list = [];
+        }
+        return list;
+      } else {
+        throw Exception(response.data.toString());
+      }
+    } catch (e) {
+      print("getAllMandis Error ${e.toString()}");
+      throw Exception(e.toString());
+    }
+  }
+
+  static Future<List> getComapnyList({String language}) async {
+    String url = cnst.API_URL + "api/company/getComapnyList";
+    // String url = "http://192.168.29.54:5000/getAllMandis?language=$language";
+    print("getAllMandis url : " + url);
+    try {
+      final response = await dio.post(url);
       print("response");
       print(response.statusCode);
       if (response.statusCode == 200) {
@@ -111,7 +139,6 @@ class Services {
   }
 
   static Future<List> getMandiProducts(body) async {
-    // http://15.206.79.244/getuserselectedmandi?MandiName=Aatpadi
     String url = cnst.API_URL + "api/mandi/getMandiProductPrice";
     print("getMandiProducts url : " + url);
     try {
@@ -133,6 +160,83 @@ class Services {
       // }
     } catch (e) {
       print("getMandiProducts Error ${e.toString()}");
+      throw Exception(e.toString());
+    }
+  }
+
+  static Future<List> getFarmerProduct(body) async {
+    // http://15.206.79.244/getuserselectedmandi?MandiName=Aatpadi
+    String url = cnst.API_URL + "api/farmer/getFarmerProduct";
+    print("getFarmerProduct url : " + url);
+    try {
+      final response = await dio.post(url,data: body);
+      List list = [];
+      if (response.statusCode == 200) {
+      print("response.data");
+      print(response.data);
+      var memberDataClass = response.data;
+      if (memberDataClass["IsSuccess"] ==true) {
+        print(memberDataClass["Data"]);
+        list = memberDataClass["Data"];
+      } else {
+        list = [];
+      }
+      return list;
+      } else {
+        throw Exception(response.data.toString());
+      }
+    } catch (e) {
+      print("getFarmerProduct Error ${e.toString()}");
+      throw Exception(e.toString());
+    }
+  }
+
+  static Future<List> addProductForSale(body) async {
+    // http://15.206.79.244/getuserselectedmandi?MandiName=Aatpadi
+    String url = cnst.API_URL + "api/farmer/addProductForSale";
+    print("addProductForSale url : " + url);
+    try {
+      final response = await dio.post(url,data: body);
+      List list = [];
+      // if (response.statusCode == 200) {
+      var memberDataClass = response.data;
+      if (memberDataClass["Data"] != 0) {
+        print("member data");
+        print(memberDataClass["Data"]);
+        list = memberDataClass["Data"];
+      } else {
+        list = [];
+      }
+      return list;
+      // } else {
+      //   throw Exception(response.data.toString());
+      // }
+    } catch (e) {
+      print("addProductForSale Error ${e.toString()}");
+      throw Exception(e.toString());
+    }
+  }
+
+  static Future<Map> getMandiDistance(body) async {
+    String url = cnst.API_URL + "api/mandi/getDistanceFromMandi";
+    print("getMandiDistance url : " + url);
+    try {
+      final response = await dio.post(url,data: body);
+      // if (response.statusCode == 200) {
+      print("response.data");
+      print(response.data);
+      var memberDataClass = response.data;
+      if (memberDataClass["Data"] != 0) {
+        print(memberDataClass["Data"]);
+      } else {
+        return {};
+      }
+      return response.data;
+      // } else {
+      //   throw Exception(response.data.toString());
+      // }
+    } catch (e) {
+      print("getMandiDistance Error ${e.toString()}");
       throw Exception(e.toString());
     }
   }
